@@ -15,7 +15,7 @@ if(process.platform==='win32'&&!process.env.SUPABASE_SECRET_KEY&&process.env.LOC
 }
 const vite=production?null:await (await import('vite')).createServer({root,server:{middlewareMode:true},appType:'spa'});
 const handlers={'/api/config':makeHandler('config'),'/api/kits':makeHandler('kits'),'/api/device':makeHandler('device')};
-const server=http.createServer(async(req,res)=>{
+export const server=http.createServer(async(req,res)=>{
   const pathname=new URL(req.url,'http://localhost').pathname;
   if(handlers[pathname]){
     res.status=code=>{res.statusCode=code;return res};res.json=value=>{res.setHeader('Content-Type','application/json; charset=utf-8');res.end(JSON.stringify(value))};

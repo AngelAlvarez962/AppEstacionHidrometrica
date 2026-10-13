@@ -4,6 +4,8 @@ Aplicación web de monitoreo hidrométrico para compradores de kits. Proyecto de
 
 ## Abrir y trabajar
 
+- **ABRIR-APP-PC.cmd:** abre la aplicación portable para Windows; requiere los ejecutables en `aplicacion-pc`. Consulta `docs/APP-PC.md`.
+- **COMPILAR-APP-PC.cmd:** genera la app portable y su instalador para Windows x64.
 - **ABRIR-MONITOREO.cmd:** abre la aplicación compilada en el navegador. Mantén abierta la ventana del lanzador.
 - **DESARROLLAR.cmd:** abre la versión de desarrollo; los cambios de la interfaz se actualizan automáticamente.
 - **CONFIGURAR-CONEXION.cmd:** configura la clave privada en esta computadora. La URL y clave pública están en `config/public.json`; la clave privada se guarda en `%LOCALAPPDATA%\EstacionHidrometrica\<proyecto>\.env.local`, fuera de la USB.

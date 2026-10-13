@@ -1,0 +1,6 @@
+{
+  "name": "herramientas-estacion-hidrometrica-pc",
+  "private": true,
+  "version": "0.1.0",
+  "devDependencies": {"electron":"44.7.0","electron-builder":"26.15.3"}
+}

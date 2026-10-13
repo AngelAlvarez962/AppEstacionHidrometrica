@@ -1,0 +1,26 @@
+{
+  "appId": "mx.hackeandolasinundaciones.monitoreo",
+  "productName": "Hackeando las inundaciones",
+  "asar": true,
+  "files": [
+    "package.json", "desktop/main.cjs", "desktop/runtime.cjs", "desktop/site.json", "desktop/icon.png",
+    "server.mjs", "lib/server.js", "src/core.js", "config/public.json", "dist/**/*"
+  ],
+  "win": {
+    "target": [{"target":"portable","arch":["x64"]},{"target":"nsis","arch":["x64"]}],
+    "icon": "desktop/icon.ico",
+    "signExecutable": false
+  },
+  "portable": {"artifactName":"Hackeando-Inundaciones-PC-${version}-Portable.exe"},
+  "nsis": {
+    "artifactName": "Hackeando-Inundaciones-PC-${version}-Instalador.exe",
+    "oneClick": false,
+    "perMachine": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "Hackeando las inundaciones",
+    "installerLanguages": ["es_ES"],
+    "runAfterFinish": false
+  }
+}

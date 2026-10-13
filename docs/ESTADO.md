@@ -18,6 +18,9 @@ Completado:
 - Compilación y pruebas de API, calibración, aislamiento y SQL completas.
 - Código público guardado en AngelAlvarez962/AppEstacionHidrometrica; no incluye la clave privada ni fichas de gateways.
 - Acceso directo «Monitoreo de kits» de esta laptop actualizado a la carpeta de la USB.
+- Aplicación para Windows x64: ejecutable portable e instalador generados, sin incluir claves privadas.
+- Ventana de Windows abierta y acceso real al panel administrador comprobado.
+- Código de la versión para PC guardado en la USB. Los ejecutables están en aplicacion-pc; consulta docs/APP-PC.md.
 
 Pendiente:
 
@@ -25,6 +28,7 @@ Pendiente:
 2. Conectar el repositorio a un proyecto Vercel nuevo.
 3. Configurar las rutas del dominio publicado y el envío de correo para compradores.
 4. Adaptar el gateway y el emparejamiento LoRa de kits distintos; probar hardware real.
+5. Validar el instalador en la otra computadora y preparar la distribución a compradores. La versión Android se trabajará después.
 
 La URL local es solo para la computadora que ejecuta el lanzador; no es todavía una página pública. Al pasar la USB a otra computadora, configura allí la clave privada una vez con CONFIGURAR-CONEXION.cmd. Usa el mismo proyecto Supabase; no vuelvas a crear tablas ni otros proyectos.
 
