@@ -1,0 +1,124 @@
+import {createClient} from '@supabase/supabase-js';
+import {calibration,measurement,text,validCode} from './core.js';
+import {DemoStore} from './demo.js';
+import {authStorage} from './auth-storage.js';
+import {installEntities} from './entities.js';
+import './styles.css';
+const $=id=>document.getElementById(id),escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const number=value=>Number(value.toFixed(1)).toLocaleString('es-MX');
+const clock=value=>new Date(value).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+let supabase=null,session=null,demo=null,mode='login',view='stations',selected=null,snapshot={stations:[],gateways:[],readings:[],kits:[],admin:false},generation=0,loading=false,authBusy=false,toastTimer,syncFailed=false;
+function showToast(message){$('toast').textContent=message;$('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').hidden=true,4500)}
+function message(id,value,error=false){$(id).textContent=value;$(id).classList.toggle('error',error)}
+function latest(station){return snapshot.readings.filter(r=>r.station_id===station.id).at(-1)}
+function state(station){return syncFailed&&!demo?{state:'offline',label:'Sin actualización'}:measurement(station,latest(station))}
+function setAuthMode(next){mode=next;message('auth-status','');const recovery=mode==='update',signup=mode==='signup',reset=mode==='reset';
+  $('auth-heading').textContent={login:'Bienvenido de nuevo',signup:'Crea tu espacio',reset:'Recupera tu acceso',update:'Elige una nueva contraseña'}[mode];
+  $('auth-description').textContent={login:'Entra para consultar y configurar tus equipos.',signup:'Registra tu cuenta y después activa el kit que compraste.',reset:'Te enviaremos un enlace a tu correo.',update:'Guarda la nueva contraseña de tu cuenta.'}[mode];
+  $('name-label').hidden=!signup;$('name-label').querySelector('input').required=signup;
+  $('email-label').hidden=recovery;$('email-label').querySelector('input').required=!recovery;
+  $('password-label').hidden=reset;$('password-label').querySelector('input').required=!reset;$('password-label').querySelector('input').autocomplete=signup||recovery?'new-password':'current-password';
+  $('auth-submit').textContent={login:'Entrar a mis equipos',signup:'Crear mi cuenta',reset:'Enviar enlace de recuperación',update:'Guardar contraseña'}[mode];
+  $('auth-tabs').hidden=recovery;$('forgot').textContent=reset?'Volver al inicio de sesión':'Olvidé mi contraseña';$('forgot').hidden=recovery;$('demo-start').parentElement.hidden=recovery;
+  document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+}
+function showAuth(){groups.resetFilters();generation++;loading=false;syncFailed=false;snapshot={stations:[],gateways:[],readings:[],kits:[],admin:false};selected=null;$('app-view').hidden=true;$('auth-view').hidden=false;$('loading').hidden=true;$('modal').close();$('auth-form').reset();setAuthMode('login')}
+function showApp(){const user=demo?demo.user:session?.user;if(!user)return;$('loading').hidden=true;$('auth-view').hidden=true;$('app-view').hidden=false;$('demo-banner').hidden=!demo;$('user-name').textContent=user.user_metadata?.display_name||user.email;$('demo-account').value=demo?.account||'ana';render()}
+async function api(method='GET',body){
+  const {data,error}=await supabase.auth.getSession();if(error||!data.session)throw Error('Tu sesión terminó. Vuelve a entrar.');
+  const response=await fetch('/api/kits',{method,headers:{Authorization:'Bearer '+data.session.access_token,...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});
+  const result=await response.json();if(!response.ok)throw Error(result.error||'No se pudo completar la operación.');return result;
+}
+async function reload(){if(loading||(!session&&!demo))return;const current=++generation;loading=true;$('refresh').disabled=true;
+  try{const data=demo?demo.snapshot():await api();if(current!==generation)return;snapshot=data;syncFailed=false;if(!snapshot.stations.some(s=>s.id===selected))selected=snapshot.stations[0]?.id||null;$('cloud-notice').hidden=true;$('sync-label').textContent=demo?'Ejemplos de uso · No son mediciones reales':'Actualizado a las '+clock(Date.now());render();}
+  catch(error){if(current!==generation)return;syncFailed=true;$('cloud-notice').hidden=false;$('cloud-notice').textContent=error.message;render();}
+  finally{if(current===generation){loading=false;$('refresh').disabled=false}}
+}
+function switchView(next){view=next;render()}
+function render(){
+  if(!session&&!demo)return;
+  groups.render();const shown=groups.visibleStations();if(!shown.some(s=>s.id===selected))selected=shown[0]?.id||null;
+  if(view==='admin'&&!snapshot.admin)view='stations';
+  $('admin-nav').hidden=!snapshot.admin;document.querySelectorAll('[data-view]').forEach(b=>b.classList.toggle('active',b.dataset.view===view));
+  for(const key of ['stations','gateways','entities','admin'])$(key+'-section').hidden=key!==view;
+  $('page-title').textContent={stations:snapshot.admin?'Todas las estaciones':'Mis estaciones',gateways:snapshot.admin?'Todos los gateways':'Mis gateways',entities:snapshot.admin?'Entidades internas':'Mis entidades',admin:'Preparar kits'}[view];
+  $('page-description').textContent={stations:snapshot.admin?'Consulta y administra los equipos de todos los compradores.':'Sigue el agua. Conoce el estado de tus equipos.',gateways:'Receptores LoRa y su última comunicación.',entities:snapshot.admin?'Organización privada del administrador.':'Tus lugares y tus estaciones, dentro de tu cuenta.',admin:'Prepara los equipos que recibirá cada comprador.'}[view];
+  $('station-count').textContent=snapshot.stations.length;$('gateway-count').textContent=snapshot.gateways.length;
+  $('online-count').textContent=snapshot.stations.filter(s=>!['waiting','offline'].includes(state(s).state)).length;
+  $('warning-count').textContent=snapshot.stations.filter(s=>['yellow','red','error'].includes(state(s).state)).length;
+  $('stations-list').innerHTML=shown.length?shown.map(s=>{const m=state(s),r=latest(s);return `<button class="station-card ${s.id===selected?'selected':''}" data-station="${escape(s.id)}" aria-pressed="${s.id===selected}"><div class="card-top"><span class="node-code">${escape(s.node_label)}</span><span class="status ${m.state}">${escape(m.label)}</span></div><h2>${escape(s.name)}</h2><p class="location">${escape(s.location||'Ubicación por configurar')}</p><p class="card-owner">${escape(snapshot.admin?'Comprador: '+groups.ownerName(s):groups.entityLabel(s))}</p><div class="card-level"><strong>${m.level===undefined?'—':number(m.level)}</strong><span>cm de agua</span><small>${m.percent===undefined?'Sin nivel válido actual':Math.round(m.percent)+'% de la altura configurada'}</small></div><div class="progress ${m.state}"><div style="width:${m.percent||0}%"></div></div><footer><span>${r?'Última lectura · '+clock(r.received_at):'Esperando su primera lectura'}</span><b>Ver detalle →</b></footer></button>`}).join(''):snapshot.stations.length?`<div class="empty"><h2>No hay estaciones en esta selección</h2><p>Elige otra entidad o comprador para consultar sus equipos.</p></div>`:`<div class="empty"><h2>Tu primera estación empieza aquí</h2><p>Activa el código incluido en tu kit. Su gateway y sus estaciones aparecerán en este espacio, listos para configurar.</p><button class="primary" data-empty-claim>Agregar mi kit</button></div>`;
+  $('stations-list').querySelectorAll('[data-station]').forEach(b=>b.onclick=()=>{selected=b.dataset.station;render()});$('stations-list').querySelector('[data-empty-claim]')?.addEventListener('click',openClaim);
+  $('gateways-list').innerHTML=snapshot.gateways.length?snapshot.gateways.map(g=>{const online=g.last_seen&&!syncFailed&&Date.now()-Date.parse(g.last_seen)<90000;return `<article class="gateway-card"><div class="card-top"><span class="node-code">GATEWAY LoRa</span><span class="status ${online?'normal':'waiting'}">${online?'Comunicación reciente':'Sin comunicación reciente'}</span></div><h2>${escape(g.name)}</h2><span class="serial">${escape(g.serial)}</span><p>${snapshot.stations.filter(s=>s.gateway_id===g.id).length} ${snapshot.stations.filter(s=>s.gateway_id===g.id).length===1?'estación vinculada':'estaciones vinculadas'}<br>${g.last_seen?'Última comunicación: '+clock(g.last_seen):'Esperando la primera conexión'}</p><div class="toolbar-actions"><button class="secondary" data-gateway="${escape(g.id)}">Cambiar nombre</button></div></article>`}).join(''):`<div class="empty"><h2>Aún no tienes gateways</h2><p>Agrega tu kit para vincular el receptor que viene en la caja.</p></div>`;
+  $('gateways-list').querySelectorAll('[data-gateway]').forEach(b=>b.onclick=()=>openGateway(b.dataset.gateway));
+  if(view==='admin')renderInventory();renderDetail();
+}
+function renderInventory(){const rows=snapshot.inventory||[];$('inventory').innerHTML='<div class="inventory-row head"><span>IDENTIFICADOR DEL KIT</span><span>ACTIVACIÓN</span><span>FECHA DE CREACIÓN</span></div>'+ (rows.length?rows.map(k=>`<div class="inventory-row"><span class="serial">${escape(k.serial)}</span><span class="status ${k.owner_id?'normal':'waiting'}">${k.owner_id?'Asignado':'Pendiente de activación'}</span><span>${new Date(k.created_at).toLocaleDateString('es-MX')}</span></div>`).join(''):'<div class="inventory-row">Todavía no hay kits preparados.</div>')}
+function renderDetail(){const s=snapshot.stations.find(s=>s.id===selected);$('detail').hidden=!s;if(!s)return;const m=state(s),r=latest(s);$('detail-name').textContent=s.name;$('detail-location').textContent=(s.location||'Ubicación por configurar')+' · '+s.serial;$('detail-level').textContent=m.level===undefined?'—':number(m.level);$('detail-percent').textContent=m.percent===undefined?m.label:Math.round(m.percent)+'% · '+m.label;
+  $('tank-water').style.height=(m.percent||0)+'%';$('tank').setAttribute('aria-label',m.level===undefined?'Sin lectura válida actual':'Nivel '+number(m.level)+' cm, '+Math.round(m.percent)+'%');$('tank-capacity').textContent=s.capacity_height?'100% = '+number(Number(s.capacity_height))+' cm':'Configura la altura';
+  for(const color of ['yellow','red']){const el=$('tank-'+color);el.hidden=!s.capacity_height;if(s.capacity_height)el.style.top=(100-s[color+'_alert']/s.capacity_height*100)+'%'}
+  $('detail-measures').textContent=s.bed_height?'Sensor a fondo: '+s.bed_height+' cm · Fondo a tope: '+s.capacity_height+' cm':'Introduce las medidas reales antes de interpretar el nivel.';
+  $('detail-updated').textContent=r?'Recepción: '+clock(r.received_at):'Sin lecturas';
+  $('detail-note').textContent=demo?'Lecturas de ejemplo para explorar el panel. No provienen de un sensor real.':r?'Distancia al agua: '+r.distance_cm+' cm · Estado del sensor: '+r.sensor_status+' · RSSI: '+r.rssi+' dBm. El historial se recalcula con las medidas actuales.':'El equipo aún no ha transmitido. La calibración no crea mediciones.';
+  $('csv').disabled=!snapshot.readings.some(r=>r.station_id===s.id);drawChart(s);
+}
+function drawChart(s){const canvas=$('chart'),ctx=canvas.getContext('2d');if(!ctx)return;const width=canvas.clientWidth||500,height=205,dpr=window.devicePixelRatio||1;canvas.width=Math.round(width*dpr);canvas.height=height*dpr;ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,width,height);
+  const rows=snapshot.readings.filter(r=>r.station_id===s.id),cfgValid=s.bed_height!==null;ctx.font='11px system-ui';ctx.fillStyle='#708694';
+  if(!rows.length||!cfgValid){ctx.textAlign='center';ctx.fillText(cfgValid?'Aquí aparecerán tus lecturas.':'Configura las medidas para calcular el nivel.',width/2,100);return}
+  const points=rows.map(r=>({r,m:measurement(s,r,Date.parse(r.received_at))})),max=Math.max(Number(s.capacity_height),...points.map(p=>p.m.level||0)),left=35,right=12,top=18,bottom=35,pw=width-left-right,ph=height-top-bottom;
+  const first=Date.parse(rows[0].received_at),last=Date.parse(rows.at(-1).received_at),x=t=>left+(last===first?.5:(t-first)/(last-first))*pw,y=v=>top+(1-v/max)*ph;
+  ctx.font='9px system-ui';ctx.textAlign='right';for(let i=0;i<=4;i++){const v=max*i/4;ctx.setLineDash([]);ctx.strokeStyle='#e3edf1';ctx.beginPath();ctx.moveTo(left,y(v));ctx.lineTo(width-right,y(v));ctx.stroke();ctx.fillText(number(v),left-7,y(v)+3)}
+  for(const [threshold,color] of [[s.yellow_alert,'#d3a021'],[s.red_alert,'#d54366']]){ctx.setLineDash([4,4]);ctx.strokeStyle=color;ctx.beginPath();ctx.moveTo(left,y(threshold));ctx.lineTo(width-right,y(threshold));ctx.stroke()}
+  ctx.setLineDash([]);ctx.strokeStyle='#0086b0';ctx.lineWidth=2;ctx.beginPath();let pen=false;for(const p of points){if(p.m.level===undefined){pen=false;continue}const a=x(Date.parse(p.r.received_at)),b=y(p.m.level);if(!pen)ctx.moveTo(a,b);else ctx.lineTo(a,b);pen=true}ctx.stroke();ctx.lineWidth=1;
+  for(const p of points){if(p.m.level===undefined)continue;ctx.beginPath();ctx.fillStyle='#0086b0';ctx.arc(x(Date.parse(p.r.received_at)),y(p.m.level),2,0,Math.PI*2);ctx.fill()}
+  ctx.fillStyle='#708694';ctx.textAlign='left';ctx.fillText(clock(rows[0].received_at),left,height-10);ctx.textAlign='right';ctx.fillText(clock(rows.at(-1).received_at),width-right,height-10);
+}
+function openModal(title,content){$('modal-title').textContent=title;$('modal-content').innerHTML=content;message('modal-status','');$('modal').showModal()}
+function bindModal(handler){const form=$('modal-content').querySelector('form');form.onsubmit=async event=>{event.preventDefault();const button=form.querySelector('[type=submit]');button.disabled=true;message('modal-status','');try{await handler(new FormData(form));}catch(error){message('modal-status',error.message,true)}finally{button.disabled=false}}}
+function openClaim(){openModal('Agrega tu kit',`<p class="modal-copy">El código de activación viene en tu caja. Vinculará sus equipos a esta cuenta y solo se puede usar una vez.</p><form><label>Código de activación<input name="code" maxlength="36" required placeholder="KIT-…" autocomplete="off" spellcheck="false"></label>${demo?'<button type="button" id="demo-code" class="text-button">Usar código del kit de prueba disponible</button>':''}<div class="modal-actions"><button type="submit" class="primary">Activar mi kit</button></div></form>`);
+  if(demo)$('demo-code').onclick=()=>{$('modal-content').querySelector('[name=code]').value=demo.pending.activation_code};
+  bindModal(async fields=>{const code=String(fields.get('code')).trim().toUpperCase();if(!validCode(code))throw Error('Usa KIT- seguido de los 32 caracteres de tu código.');if(demo)demo.assign(code);else await api('POST',{action:'claim',code});$('modal').close();await reload();showToast('Kit activado. Configura las medidas reales de tu estación.')});
+}
+function openStation(){const s=snapshot.stations.find(s=>s.id===selected);if(!s)return;openModal('Configura tu estación',`<p class="modal-copy">El nivel se calcula restando la distancia al agua a la distancia del sensor al fondo. La altura máxima de agua define el 100%. Ejemplo: 65 cm y 16 cm para tu cubeta.</p><form><label>Nombre<input name="name" required maxlength="120" value="${escape(s.name)}"></label><label>Ubicación<input name="location" maxlength="180" value="${escape(s.location)}"></label>${snapshot.admin?'':'<label>Entidad<select name="personal_entity_id">'+groups.personalOptions(s)+'</select></label>'}<div class="form-grid">${[['bed_height','Sensor a fondo (cm)'],['capacity_height','Fondo a tope (cm)'],['yellow_alert','Alerta amarilla (cm)'],['red_alert','Alerta roja (cm)']].map(([key,label])=>`<label>${label}<input name="${key}" type="number" min="${key==='yellow_alert'?0:.1}" max="600" step="0.1" required value="${escape(s[key])}"></label>`).join('')}</div><div class="modal-actions"><button type="submit" class="primary">Guardar configuración</button></div></form>`);
+  bindModal(async fields=>{const data=Object.fromEntries(fields),patch={...calibration(data),name:text(data.name),location:String(data.location||'').trim(),...(fields.has('personal_entity_id')?{personal_entity_id:String(fields.get('personal_entity_id')||'')||null}:{})};if(demo)demo.editStation(s.id,patch);else await api('PATCH',{action:'station',id:s.id,...patch});$('modal').close();await reload();showToast('Medidas guardadas. Se aplican al cálculo del nivel en la plataforma.')});
+}
+function openGateway(id){const g=snapshot.gateways.find(g=>g.id===id);if(!g)return;openModal('Identifica tu gateway',`<p class="modal-copy">Cambia su nombre para reconocerlo en tus equipos. Su identificador y credencial permanecen vinculados al kit.</p><form><label>Nombre<input name="name" required maxlength="120" value="${escape(g.name)}"></label><div class="modal-actions"><button type="submit" class="primary">Guardar nombre</button></div></form>`);bindModal(async fields=>{const name=text(fields.get('name'));if(demo)demo.editGateway(id,name);else await api('PATCH',{action:'gateway',id,name});$('modal').close();await reload();showToast('Nombre del gateway actualizado.')})}
+function download(name,data,type='application/json'){const url=URL.createObjectURL(new Blob([data],{type})),a=document.createElement('a');a.href=url;a.download=name;a.click();setTimeout(()=>URL.revokeObjectURL(url),1000)}
+function openCreate(){openModal('Prepara un nuevo kit','<p class="modal-copy">Genera un gateway y sus estaciones. Al terminar, guarda el código del comprador y la credencial del gateway: solo se mostrarán en esta ocasión.</p><form><label>Estaciones incluidas<select name="count">'+Array.from({length:8},(_,i)=>`<option value="${i+1}">${i+1} estación${i?'es':''}</option>`).join('')+'</select></label><div class="modal-actions"><button class="primary" type="submit">Generar identificadores</button></div></form>');
+  bindModal(async fields=>{const count=Number(fields.get('count'));const result=demo?demo.addKit(count):await api('POST',{action:'create',station_count:count});await reload();$('modal-title').textContent='Kit preparado';$('modal-content').innerHTML=`<p class="modal-copy">${escape(result.serial)} · ${result.stations.length} ${result.stations.length===1?'estación':'estaciones'}. Entrega el código de activación al comprador. La credencial del gateway es para preparar su firmware, no para publicarla.</p><label>Código del comprador</label><div class="code-box">${escape(result.activation_code)}</div><details class="generated-detail"><summary>Datos de preparación del equipo</summary><pre>${escape(JSON.stringify(result,null,2))}</pre></details><div class="modal-actions"><button id="download-kit" class="primary">Guardar ficha del kit</button></div><p class="modal-copy">${demo?'Esta ficha es una demostración y no activa equipos reales.':'Guarda esta ficha en un lugar privado antes de cerrar. No subas el archivo a un repositorio público.'}</p>`;$('download-kit').onclick=()=>download(result.serial+'.json',JSON.stringify(result,null,2));});
+}
+function exportCsv(){const s=snapshot.stations.find(s=>s.id===selected);if(!s)return;const rows=[['recepcion','serie_estacion','distancia_cm','nivel_cm','porcentaje_altura','estado_sensor','paquete','rssi_dbm','sensor_a_fondo_cm','fondo_a_tope_cm','origen']];for(const r of snapshot.readings.filter(r=>r.station_id===s.id)){const m=measurement(s,r,Date.parse(r.received_at));rows.push([r.received_at,s.serial,r.distance_cm,m.level??'',m.percent??'',r.sensor_status,r.packet,r.rssi,s.bed_height??'',s.capacity_height??'',demo?'DEMO':'GATEWAY'])}const csv=rows.map(row=>row.map(v=>'"'+String(v).replaceAll('"','""')+'"').join(',')).join('\r\n');download(s.serial+'.csv','\ufeff'+csv,'text/csv;charset=utf-8')}
+const groups=installEntities({$,escape,openModal,bindModal,api,reload,showToast,switchView,render,getSnapshot:()=>snapshot,getDemo:()=>demo,getUser:()=>demo?demo.user:session?.user,getSelected:()=>selected});
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>setAuthMode(b.dataset.mode));document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>switchView(b.dataset.view));
+$('forgot').onclick=()=>setAuthMode(mode==='reset'?'login':'reset');$('modal-close').onclick=()=>$('modal').close();$('claim-open').onclick=openClaim;$('edit-station').onclick=openStation;$('create-open').onclick=openCreate;$('csv').onclick=exportCsv;$('refresh').onclick=reload;
+$('demo-start').onclick=()=>{demo=new DemoStore();generation++;loading=false;selected=null;view='stations';showApp();void reload()};
+$('demo-account').onchange=()=>{demo.account=$('demo-account').value;generation++;loading=false;selected=null;snapshot=demo.snapshot();view='stations';showApp();void reload()};
+$('signout').onclick=async()=>{generation++;loading=false;if(demo){demo=null;session=null;showAuth();return}try{const {error}=await supabase.auth.signOut({scope:'local'});if(error)throw error;session=null;showAuth()}catch(_){showToast('No se pudo cerrar la sesión. Inténtalo de nuevo.')}};
+$('auth-form').onsubmit=async event=>{event.preventDefault();if(authBusy||!supabase)return;const form=event.currentTarget;authBusy=true;$('auth-submit').disabled=true;message('auth-status','');const fields=new FormData(form),email=String(fields.get('email')||'').trim(),password=String(fields.get('password')||'');
+  try{let result;
+    if(mode==='signup')result=await supabase.auth.signUp({email,password,options:{data:{display_name:text(fields.get('name'),80)},emailRedirectTo:location.origin+'/'}});
+    else if(mode==='reset')result=await supabase.auth.resetPasswordForEmail(email,{redirectTo:location.origin+'/?recovery=1'});
+    else if(mode==='update')result=await supabase.auth.updateUser({password});
+    else result=await supabase.auth.signInWithPassword({email,password});
+    if(result.error)throw result.error;
+    if(mode==='signup'){form.reset();message('auth-status','Revisa tu correo para confirmar la cuenta. Después podrás activar tu kit.');}
+    else if(mode==='reset')message('auth-status','Si existe una cuenta con ese correo, recibirás un enlace para recuperar el acceso.');
+    else if(mode==='update'){session=result.data?.user?{...session,user:result.data.user}:session;showApp();await reload();showToast('Contraseña actualizada.');}
+  }catch(error){const messages={invalid_credentials:'Correo o contraseña incorrectos.',email_not_confirmed:'Confirma tu correo antes de entrar.',over_email_send_rate_limit:'Espera unos minutos antes de solicitar otro correo.',weak_password:'Elige una contraseña más fuerte.',user_already_exists:'Revisa tu correo o entra con tu cuenta existente.'};message('auth-status',messages[error.code]||'No se pudo completar el acceso. Revisa los datos y la conexión e inténtalo de nuevo.',true)}finally{authBusy=false;$('auth-submit').disabled=false}
+};
+window.addEventListener('resize',()=>{if(selected&&!$('detail').hidden)renderDetail()});document.addEventListener('visibilitychange',()=>{if(!document.hidden)void reload()});
+setInterval(()=>{if(!document.hidden&&(!demo&&session))void reload()},15000);setInterval(()=>{if(!document.hidden&&(session||demo)&&!loading)renderDetail()},5000);
+async function start(){
+  try{const response=await fetch('/api/config');if(!response.ok)throw Error();const config=await response.json();
+    if(!config.configured){$('setup-notice').hidden=false;$('auth-submit').disabled=true;showAuth();return}
+    // Session tokens are isolated per tab. PKCE verifiers survive an email link opened in another tab.
+    const storage=authStorage(sessionStorage,localStorage);
+    // Unique channel per page prevents another tab's SIGNED_IN event replacing this account.
+    supabase=createClient(config.url,config.key,{auth:{storage,storageKey:'hi-kits-auth-'+crypto.randomUUID(),flowType:'pkce',persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+    supabase.auth.onAuthStateChange((event,next)=>{
+      session=next;if(demo)return;
+      if(event==='PASSWORD_RECOVERY'||(next&&new URLSearchParams(location.search).has('recovery'))){$('loading').hidden=true;$('app-view').hidden=true;$('auth-view').hidden=false;setAuthMode('update');history.replaceState(null,'',location.pathname);return}
+      if(next){showApp();queueMicrotask(()=>void reload())}else showAuth();
+    });
+  }catch(_){$('setup-notice').hidden=false;$('setup-notice').textContent='No se pudo cargar la conexión de esta versión. Puedes explorar la demo local.';$('auth-submit').disabled=true;showAuth()}
+}
+void start();
