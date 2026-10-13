@@ -7,6 +7,10 @@ try {
  if(-not $taskNode) { throw 'Instala Node.js 22.12 o superior para compilar. La app compilada no lo necesita.' }
  $taskNpm=Join-Path (Split-Path -Parent $taskNode) 'npm.cmd'
  $taskToolsRoot=Join-Path $env:LOCALAPPDATA 'EstacionHidrometrica\herramientas-pc-44.7.0-26.15.3'
+ $taskInstalled=Join-Path $env:LOCALAPPDATA 'EstacionHidrometrica\App-PC'
+ $taskExistingExe=Join-Path $taskInstalled 'Hackeando las inundaciones.exe'
+ $taskBuildExe=Join-Path $taskToolsRoot 'salida\win-unpacked\Hackeando las inundaciones.exe'
+ if(Get-CimInstance Win32_Process | Where-Object {$_.ExecutablePath -in @($taskExistingExe,$taskBuildExe)}) { throw 'Cierra la app de monitoreo antes de compilar una nueva version.' }
  [IO.Directory]::CreateDirectory($taskToolsRoot) | Out-Null
  Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'tools-package.json') -Destination (Join-Path $taskToolsRoot 'package.json')
  if(-not (Test-Path -LiteralPath (Join-Path $taskToolsRoot 'node_modules\electron\dist\electron.exe')) -or -not (Test-Path -LiteralPath (Join-Path $taskToolsRoot 'node_modules\electron-builder\cli.js'))) {
@@ -46,6 +50,14 @@ try {
  & $taskNode (Join-Path $taskToolsRoot 'node_modules\electron-builder\cli.js') --config $taskConfigFile --win --x64 --publish never
  if($LASTEXITCODE -ne 0) { throw 'No se pudieron generar los ejecutables de Windows.' }
  $taskVersion=(Get-Content -LiteralPath (Join-Path $PSScriptRoot 'package.json') -Raw | ConvertFrom-Json).version
+ $taskZipName='Hackeando-Inundaciones-PC-'+$taskVersion+'-Carpeta.zip'
+ $taskZip=Join-Path $taskStage $taskZipName
+ [IO.Compression.ZipFile]::CreateFromDirectory((Join-Path $taskBuiltOutput 'win-unpacked'),$taskZip,[IO.Compression.CompressionLevel]::Fastest,$false)
+ if(-not $NoCopy) {
+  Copy-Item -LiteralPath $taskZip -Destination (Join-Path $taskOutput $taskZipName) -Force
+  [IO.Directory]::CreateDirectory($taskInstalled) | Out-Null
+  Get-ChildItem -LiteralPath (Join-Path $taskBuiltOutput 'win-unpacked') -Force | Copy-Item -Destination $taskInstalled -Recurse -Force
+ }
  foreach($taskSuffix in @('Portable','Instalador')) {
   $taskArtifact='Hackeando-Inundaciones-PC-'+$taskVersion+'-'+$taskSuffix+'.exe'
   if(-not $NoCopy) { Copy-Item -LiteralPath (Join-Path $taskBuiltOutput $taskArtifact) -Destination (Join-Path $taskOutput $taskArtifact) }

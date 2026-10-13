@@ -2,8 +2,12 @@
 
 Los ejecutables están en `aplicacion-pc` dentro de la USB:
 
-- `Hackeando-Inundaciones-PC-0.1.0-Portable.exe`: abre sin instalar, con una ventana propia. También puedes usar `ABRIR-APP-PC.cmd`.
-- `Hackeando-Inundaciones-PC-0.1.0-Instalador.exe`: instala para tu usuario de Windows y crea accesos en escritorio e Inicio.
+En esta laptop, Windows bloqueó el launcher portable con su control de aplicaciones. La versión completa de carpeta sí abrió y se comprobó con la cuenta administradora. El acceso directo usa esa versión en `%LOCALAPPDATA%\EstacionHidrometrica\App-PC`. No se modificaron las protecciones de Windows.
+
+El paquete `Hackeando-Inundaciones-PC-0.1.0-Carpeta.zip` contiene la app y sus archivos de soporte. Para probarlo en otra computadora, extráelo en una carpeta y abre `Hackeando las inundaciones.exe`. Si Windows lo bloquea, requiere resolver la firma del editor antes de distribuirlo. No incluye claves privadas.
+
+- `Hackeando-Inundaciones-PC-0.1.0-Portable.exe`: generado, pero su launcher está bloqueado en esta laptop.
+- `Hackeando-Inundaciones-PC-0.1.0-Instalador.exe`: generado; queda pendiente resolver la firma y validar su instalación.
 
 La versión compilada incluye su propio runtime; no requiere instalar Node.js. Está preparada para Windows x64. El instalador inicial no cuenta con firma digital de un editor; eso se resolverá antes de distribuir comercialmente.
 
@@ -21,7 +25,7 @@ Para distribuir a compradores, primero publica la web y su API en Vercel, config
 
 ## Modificar y recompilar
 
-Edita el proyecto de la USB y ejecuta `COMPILAR-APP-PC.cmd`. Requiere Node.js en la computadora que compila, y las dependencias web del proyecto. Descarga Electron y electron-builder desde npm y sus distribuciones oficiales. Las herramientas y la carpeta temporal de compilación se guardan en `%LOCALAPPDATA%\EstacionHidrometrica`, para no duplicar miles de dependencias en la USB.
+Cierra la app, edita el proyecto de la USB y ejecuta `COMPILAR-APP-PC.cmd`. Genera el paquete completo de carpeta y los ejecutables, y actualiza la copia local de la app. Requiere Node.js en la computadora que compila, y las dependencias web del proyecto. Descarga Electron y electron-builder desde npm y sus distribuciones oficiales. Las herramientas y la carpeta temporal de compilación se guardan en `%LOCALAPPDATA%\EstacionHidrometrica`, para no duplicar miles de dependencias en la USB.
 
 El empaquetado usa una lista explícita de archivos permitidos. Excluye `.env`, claves privadas, fichas de gateways, pruebas y documentación de comprobación. Los ejecutables y la salida compilada no se incluyen en Git; se compilan de nuevo cuando cambia el proyecto.
 

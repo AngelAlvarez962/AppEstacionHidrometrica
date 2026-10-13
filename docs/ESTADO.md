@@ -21,6 +21,7 @@ Completado:
 - Aplicación para Windows x64: ejecutable portable e instalador generados, sin incluir claves privadas.
 - Ventana de Windows abierta y acceso real al panel administrador comprobado.
 - Código de la versión para PC guardado en la USB. Los ejecutables están en aplicacion-pc; consulta docs/APP-PC.md.
+- Windows bloquea el launcher portable generado. La versión de carpeta sí funciona; la firma del editor es pendiente antes de distribuir instaladores.
 
 Pendiente:
 
