@@ -1,0 +1,22 @@
+{
+  "name": "hackeando-inundaciones-kits",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "node --env-file-if-exists=.env.local server.mjs",
+    "build": "vite build",
+    "preview": "node --env-file-if-exists=.env.local server.mjs --production",
+    "test": "node tests/core.test.mjs && node tests/api.test.mjs && node tests/security-db.test.mjs"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "2.117.3"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.8",
+    "vite": "8.3.4"
+  }
+}
