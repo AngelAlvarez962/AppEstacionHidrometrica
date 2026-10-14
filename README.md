@@ -2,10 +2,12 @@
 
 Aplicación web de monitoreo hidrométrico para compradores de kits. Proyecto de trabajo guardado en la USB; repositorio: **AngelAlvarez962/AppEstacionHidrometrica**.
 
+Versión local **0.2.0**: tres presentaciones, expansión con gateways propios, identificadores cortos, registro obligatorio y cola de avisos. Consulta `docs/PRUEBAS-VERSION-0.2.md` para probarla. El proveedor de correo y la integración de hardware siguen pendientes.
+
 ## Abrir y trabajar
 
-- **ABRIR-APP-PC.cmd:** abre la aplicación portable para Windows; requiere los ejecutables en `aplicacion-pc`. Consulta `docs/APP-PC.md`.
-- **COMPILAR-APP-PC.cmd:** genera la app portable y su instalador para Windows x64.
+- **ABRIR-APP-PC.cmd:** abre la copia completa de la aplicación para Windows. Consulta `docs/APP-PC.md`.
+- **COMPILAR-APP-PC.cmd:** genera el ZIP de carpeta para Windows x64.
 - **ABRIR-MONITOREO.cmd:** abre la aplicación compilada en el navegador. Mantén abierta la ventana del lanzador.
 - **DESARROLLAR.cmd:** abre la versión de desarrollo; los cambios de la interfaz se actualizan automáticamente.
 - **CONFIGURAR-CONEXION.cmd:** configura la clave privada en esta computadora. La URL y clave pública están en `config/public.json`; la clave privada se guarda en `%LOCALAPPDATA%\EstacionHidrometrica\<proyecto>\.env.local`, fuera de la USB.
@@ -31,7 +33,7 @@ Las estaciones físicas se vinculan al reclamar el código de su kit. Los nombre
 
 Proyecto Supabase: **monitoreo-rio-kits**. La instalación inicial en ese proyecto ya fue aplicada y verificada; no vuelvas a ejecutar las migraciones allí.
 
-En una base de datos nueva, ejecuta en orden `supabase/001-kits.sql` y `supabase/002-entities-and-admin.sql`. Las doce tablas tienen RLS activo. Las credenciales de gateways y códigos de activación se almacenan como hashes y no se entregan a usuarios normales.
+En una base nueva, ejecuta las migraciones de `supabase/001-kits.sql` a `supabase/005-serialize-ingestion.sql` en orden. Las catorce tablas tienen RLS activo. Las credenciales de gateways y códigos de activación se almacenan como hashes y no se entregan a usuarios normales.
 
 El acceso por correo requiere la confirmación del usuario. Antes de abrir el registro a compradores externos, configura un proveedor SMTP para los correos de producción y prueba confirmación/recuperación con cuentas reales.
 

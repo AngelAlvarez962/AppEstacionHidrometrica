@@ -1,36 +1,19 @@
-# Estado del proyecto · 13 de octubre de 2026
+# Estado del proyecto — laptop, 14 de octubre de 2026
 
-Ubicación de trabajo: carpeta EstacionHidrometrica en la USB KODAK (actualmente E:).
-Repositorio: AngelAlvarez962/AppEstacionHidrometrica.
-Supabase: monitoreo-rio-kits, referencia njwxrnhfxjbtsxemrmol.
+Versión 0.2.0. Fuente: E:\Estacion Hidrometrica Work\EstacionHidrometrica. Repositorio: AngelAlvarez962/AppEstacionHidrometrica. Supabase: monitoreo-rio-kits, ref njwxrnhfxjbtsxemrmol.
 
-Completado:
+Ya hay aplicación para navegador y Windows x64, inicio de sesión y primera cuenta administradora confirmada. Las catorce tablas tienen RLS. Migraciones 001 a 005 aplicadas; no repetirlas en esta base. Se conservan datos e historial existentes.
 
-- Aplicación y código fuente guardados en la USB con rutas relativas.
-- Doce tablas creadas en Supabase; RLS activo en todas.
-- URL local de autenticación configurada: http://127.0.0.1:8790/.
-- Rutas de confirmación y recuperación local permitidas.
-- Clave pública configurada; clave privada guardada y verificada en esta laptop, fuera de la USB.
-- Conexión real a la base de datos verificada (HTTP 200).
-- Permisos y entidades separados entre comprador y administrador, con pruebas de PostgreSQL.
-- Eliminación recuperable de estaciones; una estación eliminada no acepta lecturas nuevas.
-- Primera cuenta creada, correo confirmado y rol administrador asignado; acceso real al panel comprobado.
-- Compilación y pruebas de API, calibración, aislamiento y SQL completas.
-- Código público guardado en AngelAlvarez962/AppEstacionHidrometrica; no incluye la clave privada ni fichas de gateways.
-- Acceso directo «Monitoreo de kits» de esta laptop actualizado a la carpeta de la USB.
-- Aplicación para Windows x64: ejecutable portable e instalador generados, sin incluir claves privadas.
-- Ventana de Windows abierta y acceso real al panel administrador comprobado.
-- Código de la versión para PC guardado en la USB. Los ejecutables están en aplicacion-pc; consulta docs/APP-PC.md.
-- Windows bloquea el launcher portable generado. La versión de carpeta sí funciona; la firma del editor es pendiente antes de distribuir instaladores.
+La versión 0.2.0 agrega tres presentaciones (estación + gateway, solo estación, solo gateway), identificadores cortos y estaciones con propiedad independiente del receptor. Una estación puede usar el gateway de otra compra del mismo comprador. No puede usar un gateway de otra cuenta. La activación exige completar gateway y calibración antes de aceptar lecturas. Incluye activación de un gateway dentro del proceso y cierre de sesión para retomarlo después.
 
-Pendiente:
+Se mantiene la separación entre entidades personales y clasificación privada del administrador. Los compradores solo ven y modifican sus propios dispositivos. Las estaciones eliminadas pueden restaurarse y conservan historial.
 
-1. Probar la activación de un kit real con su comprador y su hardware.
-2. Conectar el repositorio a un proyecto Vercel nuevo.
-3. Configurar las rutas del dominio publicado y el envío de correo para compradores.
-4. Adaptar el gateway y el emparejamiento LoRa de kits distintos; probar hardware real.
-5. Validar el instalador en la otra computadora y preparar la distribución a compradores. La versión Android se trabajará después.
+Los avisos por correo tienen preferencia por cuenta, cola privada, deduplicación y reintentos simulados. No hay proveedor ni envío real configurado. El adaptador usa Resend con variables privadas; los mensajes requieren Internet y servidor activo. No se envían avisos de desconexión aún. La autenticación por correo de Supabase es independiente.
 
-La URL local es solo para la computadora que ejecuta el lanzador; no es todavía una página pública. Al pasar la USB a otra computadora, configura allí la clave privada una vez con CONFIGURAR-CONEXION.cmd. Usa el mismo proyecto Supabase; no vuelvas a crear tablas ni otros proyectos.
+Paquete: aplicacion-pc/Hackeando-Inundaciones-PC-0.2.0-Carpeta.zip. Incluye ejecutable, runtime e instrucciones. Copia local actualizada en %LOCALAPPDATA%\EstacionHidrometrica\App-PC. ABRIR-APP-PC.cmd abre esa copia. Esta versión y su ZIP permanecen locales: no se subió a GitHub ni se creó una plataforma de descargas.
 
-El correo de confirmación local regresa a 127.0.0.1 en el dispositivo que lo abre. Si se abre desde el celular, esa dirección no llega a la laptop. El correo puede haber quedado confirmado antes de mostrar ERR_CONNECTION_REFUSED; en ese caso inicia sesión desde la laptop. Para compradores, se usará el dominio público al desplegar.
+La clave privada de Supabase permanece únicamente en el perfil de Windows de esta laptop, fuera de la USB, el ZIP y Git. En otra PC sin configuración funciona la demo. Para compradores hace falta una API central; no se les debe entregar una clave privada. Esta edición necesita Internet para datos reales y todavía no incorpora el visualizador USB sin conexión del proyecto anterior.
+
+Validación: pruebas automatizadas de cálculo, API, RLS, migración, expansión de kits, cola de correos, aislamiento de cuentas y protección de navegación de escritorio; compilación web y Windows. Pruebas visuales en demo de registro, medidas inválidas, Escape, activación de receptor y vuelta al panel. La ventana compilada de Windows abrió y mostró el monitoreo de ejemplo; cierre y arranque desde cero comprobados. No se crearon equipos de prueba ni lecturas ficticias en Supabase.
+
+Próximo paso: probar un kit físico (firmware, serie técnica y credencial de la ficha, conexión a esta API) y ajustar errores. Pendientes: Wi-Fi del gateway desde la app, correos reales, segunda PC y API central para compradores. Android queda para después. Consulta PRUEBAS-VERSION-0.2.md.

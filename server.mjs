@@ -4,7 +4,7 @@ import {fileURLToPath} from 'node:url';
 import {resolve,extname,sep} from 'node:path';
 import {spawn} from 'node:child_process';
 import {loadEnvFile} from 'node:process';
-import {makeHandler} from './lib/server.js';
+import {makeHandler,processEmailQueue} from './lib/server.js';
 const production=process.argv.includes('--production');
 const root=fileURLToPath(new URL('.',import.meta.url)),dist=resolve(root,'dist');
 try{const config=JSON.parse(await readFile(resolve(root,'config/public.json'),'utf8'));process.env.SUPABASE_URL ||= config.url;if(config.key)process.env.SUPABASE_PUBLISHABLE_KEY ||= config.key;}catch(_){/* Vercel uses its environment variables. */}
@@ -15,6 +15,7 @@ if(process.platform==='win32'&&!process.env.SUPABASE_SECRET_KEY&&process.env.LOC
 }
 const vite=production?null:await (await import('vite')).createServer({root,server:{middlewareMode:true},appType:'spa'});
 const handlers={'/api/config':makeHandler('config'),'/api/kits':makeHandler('kits'),'/api/device':makeHandler('device')};
+const emailTimer=setInterval(()=>void processEmailQueue(),60000);emailTimer.unref();
 export const server=http.createServer(async(req,res)=>{
   const pathname=new URL(req.url,'http://localhost').pathname;
   if(handlers[pathname]){
@@ -29,6 +30,7 @@ export const server=http.createServer(async(req,res)=>{
   if(path===dist)path=resolve(dist,'index.html');
   try{const content=await readFile(path);res.setHeader('Content-Type',({'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.svg':'image/svg+xml'})[extname(path)]||'application/octet-stream');res.end(content);}catch(_){res.writeHead(404);res.end('No encontrado')}
 });
+server.on('close',()=>clearInterval(emailTimer));
 const port=Number(process.env.PORT||8790);
 if(!Number.isInteger(port)||port<1024||port>65535)throw Error('Puerto local inválido.');
 server.on('error',error=>{console.error(error.code==='EADDRINUSE'?'El puerto '+port+' ya está ocupado. Usa la ventana que está abierta o cambia PORT en .env.local.':error.message);process.exitCode=1;});

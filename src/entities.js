@@ -1,9 +1,10 @@
+import {stationOwner} from './onboarding.js';
 export function installEntities(ctx){
  const {$,escape,openModal,bindModal,api,reload,showToast}=ctx;
  let entityFilter='all',ownerFilter='all';
  const data=()=>ctx.getSnapshot(),demo=()=>ctx.getDemo(),scope=()=>data().admin?'admin':'personal';
  const entities=()=>data().admin?(data().adminEntities||[]):(data().personalEntities||[]).filter(e=>e.owner_id===ctx.getUser()?.id);
- function ownerId(station){const gateway=data().gateways.find(g=>g.id===station.gateway_id);return data().kits.find(k=>k.id===gateway?.kit_id)?.owner_id||null}
+ function ownerId(station){return stationOwner(station,data())}
  function ownerName(station){const id=ownerId(station);return data().profiles?.find(p=>p.user_id===id)?.display_name||(id?'Comprador':'Kit sin activar')}
  function entityId(station){return data().admin?(data().adminAssignments||[]).find(a=>a.station_id===station.id)?.entity_id||null:station.personal_entity_id||null}
  function entityLabel(station){return entities().find(e=>e.id===entityId(station))?.name||'Sin entidad'}

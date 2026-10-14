@@ -34,7 +34,7 @@ Devuelve `configured`, URL y clave pública. Nunca devuelve la clave privada. No
 
 Devuelve `admin`, `kits`, `gateways`, `stations` y `readings` pertenecientes al usuario. Las lecturas incluyen las últimas 120 por estación ordenadas por recepción. El servidor agrega `inventory` de los últimos 100 kits únicamente a administradores.
 
-Las estaciones tienen UUID `id`, UUID `gateway_id`, `serial` global, `node_label`, nombre, ubicación y cuatro medidas. Los cuatro valores de calibración son inicialmente `null`; se guardan juntos.
+Las estaciones tienen UUID `id`, UUID `kit_id`, UUID `gateway_id` (puede ser null durante configuración), `friendly_code`, `setup_pending`, `serial` global, `node_label`, nombre, ubicación y cuatro medidas. Los cuatro valores de calibración son inicialmente `null`; se guardan juntos.
 
 ## POST /api/kits · Reclamar kit
 
@@ -49,10 +49,10 @@ Devuelve `kit_id`; no permite seleccionar el nuevo propietario. Un código invá
 ## PATCH /api/kits · Configurar estación
 
 ```json
-{"action":"station","id":"UUID-DE-LA-ESTACION","name":"Cubeta de prueba","location":"Laboratorio","bed_height":65,"capacity_height":16,"yellow_alert":12,"red_alert":15}
+{"action":"station","id":"UUID-DE-LA-ESTACION","gateway_id":"UUID-DEL-GATEWAY","name":"Cubeta de prueba","location":"Laboratorio","bed_height":65,"capacity_height":16,"yellow_alert":12,"red_alert":15}
 ```
 
-Las medidas están en cm. Sensor a fondo > 20 y ≤ 600; 0 < fondo a tope ≤ sensor a fondo; 0 ≤ amarilla < roja ≤ fondo a tope. No permite cambiar propietario, gateway, serie o identidad. Se ejecuta con el JWT del comprador y RLS; si no pertenece a esa cuenta devuelve 404.
+Las medidas están en cm. Sensor a fondo > 20 y ≤ 600; 0 < fondo a tope ≤ sensor a fondo; 0 ≤ amarilla < roja ≤ fondo a tope. Permite elegir un gateway de la misma cuenta; no permite cambiar propietario, serie o identidad. Se ejecuta con el JWT del comprador y RLS; si no pertenece a esa cuenta devuelve 404.
 
 El nivel se calcula a partir de la distancia bruta; el porcentaje divide entre fondo a tope. El valor en cm puede superar la capacidad; la barra se limita al 100%. No se calcula nivel para un error de sensor, una lectura en zona ciega o una estación sin calibrar. El CSV usa la calibración actual; no representa volumen en litros.
 
@@ -67,10 +67,10 @@ No cambia la red Wi-Fi ni envía comandos al equipo.
 ## POST /api/kits · Preparar kit (administrador)
 
 ```json
-{"action":"create","station_count":1}
+{"action":"create","kind":"complete"}
 ```
 
-De 1 a 8 estaciones. Se verifica `kit_admins` y el SQL vuelve a comprobar el administrador. Se generan identificadores aleatorios, código de activación y token de gateway. La respuesta entrega `kit_id`, `serial`, `activation_code`, `gateway_serial`, `gateway_token` y `stations`.
+Presentaciones: `complete` (una estación y un gateway), `station` (una estación) y `gateway` (un gateway). Se verifica `kit_admins` y el SQL vuelve a comprobarlo. La respuesta entrega identificadores amigables, series técnicas y código de activación; la credencial del gateway solo aparece si la presentación lo incluye. Cada compra puede compartir un receptor de la misma cuenta.
 
 Guarda la respuesta en un archivo privado para preparar el equipo. Los códigos/tokens originales no se guardan en la base de datos y no tienen una ruta de recuperación. Nunca publiques estas fichas JSON.
 
@@ -92,3 +92,12 @@ El servidor autentica el gateway por el hash de su token, rechaza credenciales r
 `sensor_status`: OK, ERR_CABLE, ERR_CORTO, SIN_ECO, MUY_CERCA, FUERA_RANGO o ERR_DESBORDE. Distancia numérica finita entre 0 y 10000; packet entero seguro no negativo; RSSI entero de -200 a 0. Los estados inválidos no se insertan. Una distancia OK fuera de 20–600 cm se conserva como dato bruto pero no produce un nivel válido en el panel.
 
 La hora `received_at` la genera el servidor. Este contrato inicial no incluye hora propia del sensor, autenticación criptográfica del enlace LoRa, caché sin conexión ni deduplicación de reintentos. Se deben completar y probar esas partes del firmware antes de vender los kits. La consulta web es por intervalos; no hay WebSocket ni notificación push en esta fase.
+
+
+## Cambios de la versión 0.2
+
+Preparación: `POST /api/kits` con `action: "create"` y `kind: "complete" | "station" | "gateway"`, solo administrador. Retira `station_count`. Devuelve identificadores cortos y datos técnicos; solo devuelve `gateway_token` si existe gateway. La ficha es privada.
+
+Configuración: `PATCH /api/kits`, `action: "station"`, ahora requiere `gateway_id` junto con nombre y las cuatro medidas. La base exige que el gateway sea del mismo propietario. La estación conserva su kit aunque use el gateway de otra compra. `setup_pending` es un valor calculado por la base; el cliente no puede falsearlo. Una estación pendiente o eliminada no acepta ingesta.
+
+Correo: `PATCH /api/kits`, `action: "email-preference"`, `enabled: true/false`. Se modifica solo el perfil del usuario verificado. No acepta un destinatario elegido por el cliente. Los envíos necesitan proveedor y servidor activo; no están configurados todavía.

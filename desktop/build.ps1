@@ -32,7 +32,7 @@ try {
  $taskStage=Join-Path $taskToolsRoot ('compilacion-'+[guid]::NewGuid().ToString('N'))
  [IO.Directory]::CreateDirectory($taskStage) | Out-Null
  foreach($taskFolder in @('desktop','lib','src','config')) { [IO.Directory]::CreateDirectory((Join-Path $taskStage $taskFolder)) | Out-Null }
- foreach($taskFile in @('desktop\main.cjs','desktop\runtime.cjs','desktop\site.json','desktop\icon.png','desktop\icon.ico','server.mjs','lib\server.js','src\core.js','config\public.json')) {
+ foreach($taskFile in @('desktop\main.cjs','desktop\runtime.cjs','desktop\site.json','desktop\icon.png','desktop\icon.ico','server.mjs','lib\server.js','lib\email.js','src\core.js','config\public.json')) {
   Copy-Item -LiteralPath (Join-Path $taskRoot $taskFile) -Destination (Join-Path $taskStage $taskFile)
  }
  Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'package.json') -Destination (Join-Path $taskStage 'package.json')
@@ -47,20 +47,18 @@ try {
  $taskConfigFile=Join-Path $taskToolsRoot 'builder-current.json'
  [IO.File]::WriteAllText($taskConfigFile,($taskBuilderConfig | ConvertTo-Json -Depth 10),[Text.UTF8Encoding]::new($false))
  $env:CSC_IDENTITY_AUTO_DISCOVERY='false'
- & $taskNode (Join-Path $taskToolsRoot 'node_modules\electron-builder\cli.js') --config $taskConfigFile --win --x64 --publish never
+ & $taskNode (Join-Path $taskToolsRoot 'node_modules\electron-builder\cli.js') --config $taskConfigFile --win --x64 --dir --publish never
  if($LASTEXITCODE -ne 0) { throw 'No se pudieron generar los ejecutables de Windows.' }
  $taskVersion=(Get-Content -LiteralPath (Join-Path $PSScriptRoot 'package.json') -Raw | ConvertFrom-Json).version
  $taskZipName='Hackeando-Inundaciones-PC-'+$taskVersion+'-Carpeta.zip'
  $taskZip=Join-Path $taskStage $taskZipName
+ Add-Type -AssemblyName System.IO.Compression.FileSystem
+ Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'LEEME-PC.txt') -Destination (Join-Path $taskBuiltOutput 'win-unpacked\LEEME-PC.txt') -Force
  [IO.Compression.ZipFile]::CreateFromDirectory((Join-Path $taskBuiltOutput 'win-unpacked'),$taskZip,[IO.Compression.CompressionLevel]::Fastest,$false)
  if(-not $NoCopy) {
   Copy-Item -LiteralPath $taskZip -Destination (Join-Path $taskOutput $taskZipName) -Force
   [IO.Directory]::CreateDirectory($taskInstalled) | Out-Null
   Get-ChildItem -LiteralPath (Join-Path $taskBuiltOutput 'win-unpacked') -Force | Copy-Item -Destination $taskInstalled -Recurse -Force
- }
- foreach($taskSuffix in @('Portable','Instalador')) {
-  $taskArtifact='Hackeando-Inundaciones-PC-'+$taskVersion+'-'+$taskSuffix+'.exe'
-  if(-not $NoCopy) { Copy-Item -LiteralPath (Join-Path $taskBuiltOutput $taskArtifact) -Destination (Join-Path $taskOutput $taskArtifact) }
  }
  Write-Host ('Aplicacion lista en: '+$(if($NoCopy){$taskBuiltOutput}else{$taskOutput})) -ForegroundColor Green
 } catch { Write-Host ('Error: '+$_.Exception.Message) -ForegroundColor Red; exit 1 }

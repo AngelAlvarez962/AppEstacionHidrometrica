@@ -16,20 +16,23 @@ export class DemoStore {
  }
  get user(){return {id:ids[this.account],email:this.account+'@ejemplo.invalid',user_metadata:{display_name:names[this.account]}}}
  addKit(count,serial){
-  const kit={id:uid(),serial:serial||'DEMO-'+hex(4),owner_id:null,created_at:new Date().toISOString(),claimed_at:null};const gateway={id:uid(),kit_id:kit.id,serial:'GW-DEMO-'+hex(4),name:'Mi gateway',last_seen:null};
-  const stations=Array.from({length:count},(_,i)=>({id:uid(),gateway_id:gateway.id,serial:'EST-DEMO-'+hex(4),node_label:'RIO_'+String(i+1).padStart(2,'0'),name:'Estación '+(i+1),location:'',bed_height:null,capacity_height:null,yellow_alert:null,red_alert:null,personal_entity_id:null,deleted_at:null}));
-  this.kits.push(kit);this.gateways.push(gateway);this.stations.push(...stations);const activation_code='KIT-'+hex(16);this.codes.set(activation_code,kit.id);
-  return {kit_id:kit.id,serial:kit.serial,gateway_serial:gateway.serial,activation_code,gateway_token:'CREDENCIAL-DE-EJEMPLO-NO-FUNCIONA',stations};
+  const kind=typeof count==='string'?count:'complete',amount=typeof count==='number'?count:kind==='gateway'?0:1;
+  if(!['complete','station','gateway'].includes(kind))throw Error('Presentación inválida.');
+  const code=(prefix,n)=>prefix+'-'+String(n+1).padStart(6,'0');
+  const kit={id:uid(),kind,friendly_code:code('KIT',this.kits.length),serial:serial||'DEMO-'+hex(4),owner_id:null,created_at:new Date().toISOString(),claimed_at:null};const gateway=kind==='station'?null:{id:uid(),kit_id:kit.id,friendly_code:code('GW',this.gateways.length),serial:'GW-DEMO-'+hex(4),name:'Mi gateway',last_seen:null};
+  const stations=Array.from({length:amount},(_,i)=>({id:uid(),kit_id:kit.id,gateway_id:gateway?.id||null,friendly_code:code('EST',this.stations.length+i),serial:'EST-DEMO-'+hex(4),node_label:'RIO_'+String(i+1).padStart(2,'0'),name:'Estación '+(i+1),location:'',bed_height:null,capacity_height:null,yellow_alert:null,red_alert:null,personal_entity_id:null,deleted_at:null}));
+  this.kits.push(kit);if(gateway)this.gateways.push(gateway);this.stations.push(...stations);const activation_code='KIT-'+hex(16);this.codes.set(activation_code,kit.id);
+  return {kit_id:kit.id,kind,friendly_code:kit.friendly_code,serial:kit.serial,gateway,activation_code,...(gateway?{gateway_serial:gateway.serial,gateway_token:'CREDENCIAL-DE-EJEMPLO-NO-FUNCIONA'}:{}),stations};
  }
  assign(code,account=this.account){const kid=this.codes.get(code),kit=this.kits.find(k=>k.id===kid);if(!kit||kit.owner_id)throw Error('Código inválido o ya utilizado.');kit.owner_id=ids[account];kit.claimed_at=new Date().toISOString();this.codes.delete(code);return {kit_id:kid}}
- stationOwner(station){return this.kits.find(k=>k.id===this.gateways.find(g=>g.id===station.gateway_id)?.kit_id)?.owner_id}
+ stationOwner(station){return this.kits.find(k=>k.id===station.kit_id)?.owner_id}
  allowedStation(id){const station=this.stations.find(s=>s.id===id);if(!station||(this.account!=='admin'&&this.stationOwner(station)!==this.user.id))throw Error('No tienes acceso a esa estación.');return station}
  snapshot(){
-  const admin=this.account==='admin',kits=this.kits.filter(k=>admin||k.owner_id===this.user.id),gateways=this.gateways.filter(g=>kits.some(k=>k.id===g.kit_id));const all=this.stations.filter(s=>gateways.some(g=>g.id===s.gateway_id)),stations=all.filter(s=>!s.deleted_at),archivedStations=all.filter(s=>s.deleted_at),readings=[];
+  const admin=this.account==='admin',kits=this.kits.filter(k=>admin||k.owner_id===this.user.id),gateways=this.gateways.filter(g=>kits.some(k=>k.id===g.kit_id));const all=this.stations.filter(s=>kits.some(k=>k.id===s.kit_id)),stations=all.filter(s=>!s.deleted_at),archivedStations=all.filter(s=>s.deleted_at),readings=[];
   for(const station of stations){const example=this.examples.get(station.id);if(!example)continue;for(let i=0;i<25;i++){const level=example.level+(i<16?Math.sin(i/4)*1.5:0);readings.push({id:i+1,station_id:station.id,distance_cm:example.bed-level,sensor_status:'OK',packet:i+1,rssi:-74,received_at:new Date(Date.now()-(24-i)*10000).toISOString()})}gateways.find(g=>g.id===station.gateway_id).last_seen=new Date().toISOString()}
   const data={admin,kits,gateways,stations,archivedStations,readings,profiles:Object.keys(ids).filter(key=>admin||key===this.account).map(key=>({user_id:ids[key],display_name:names[key]})),personalEntities:this.personalEntities.filter(e=>admin||e.owner_id===this.user.id),inventory:admin?this.kits:[]};if(admin){data.adminEntities=this.adminEntities;data.adminAssignments=this.adminAssignments}return structuredClone(data);
  }
- editStation(id,patch){const station=this.allowedStation(id);if(patch.personal_entity_id&&!this.personalEntities.some(e=>e.id===patch.personal_entity_id&&e.owner_id===this.stationOwner(station)))throw Error('La entidad debe pertenecer al propietario de la estación.');Object.assign(station,patch)}
+ editStation(id,patch){const station=this.allowedStation(id);if(patch.gateway_id){const g=this.gateways.find(g=>g.id===patch.gateway_id);if(!g||(g.kit_id!==station.kit_id&&(!this.stationOwner(station)||this.kits.find(k=>k.id===g.kit_id)?.owner_id!==this.stationOwner(station))))throw Error('Selecciona un gateway de la misma cuenta.');}if(patch.personal_entity_id&&!this.personalEntities.some(e=>e.id===patch.personal_entity_id&&e.owner_id===this.stationOwner(station)))throw Error('La entidad debe pertenecer al propietario de la estación.');Object.assign(station,patch)}
  editGateway(id,name){if(!this.snapshot().gateways.some(g=>g.id===id))throw Error('No tienes acceso a ese gateway.');this.gateways.find(g=>g.id===id).name=name}
  deleteStation(id){this.allowedStation(id).deleted_at=new Date().toISOString()}
  restoreStation(id){this.allowedStation(id).deleted_at=null}

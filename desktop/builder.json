@@ -4,7 +4,7 @@
   "asar": true,
   "files": [
     "package.json", "desktop/main.cjs", "desktop/runtime.cjs", "desktop/site.json", "desktop/icon.png",
-    "server.mjs", "lib/server.js", "src/core.js", "config/public.json", "dist/**/*"
+    "server.mjs", "lib/server.js", "lib/email.js", "src/core.js", "config/public.json", "dist/**/*"
   ],
   "win": {
     "target": [{"target":"portable","arch":["x64"]},{"target":"nsis","arch":["x64"]}],
