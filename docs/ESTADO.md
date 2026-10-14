@@ -2,6 +2,8 @@
 
 Versión 0.2.0. Fuente: E:\Estacion Hidrometrica Work\Codigo\EstacionHidrometrica. Repositorio: AngelAlvarez962/AppEstacionHidrometrica. Supabase: monitoreo-rio-kits, ref njwxrnhfxjbtsxemrmol.
 
+Práctica física del 14 de octubre: se identificó COM3 como gateway de KIT-000001 y se configuró EST-000001 con distancia al fondo 62.3 cm (regla), capacidad 16 cm y avisos a 12/15 cm. El eco no está validado: la cubeta vacía dio unos 49–60 cm, aunque la regla indica 62.3 cm. No corregir esto usando 50.4 como fondo. Se preparó `firmware/practica-cubeta` con sketches y un puente USB de desarrollo; el parser y recepción por USB se probaron, pero publicar lecturas permanece desactivado. La herramienta de diagnóstico no sustituye un monitor USB offline integrado en la app. Los intentos de respaldo de flash se interrumpieron: no se cambió el firmware del gateway ni se afirma que exista un respaldo completo. La estación ya no está disponible; pendientes prueba física y envío real a la app. Ver `firmware/practica-cubeta/LEEME.md`.
+
 Ya hay aplicación para navegador y Windows x64, inicio de sesión y primera cuenta administradora confirmada. Las catorce tablas tienen RLS. Migraciones 001 a 005 aplicadas; no repetirlas en esta base. Se conservan datos e historial existentes.
 
 La versión 0.2.0 agrega tres presentaciones (estación + gateway, solo estación, solo gateway), identificadores cortos y estaciones con propiedad independiente del receptor. Una estación puede usar el gateway de otra compra del mismo comprador. No puede usar un gateway de otra cuenta. La activación exige completar gateway y calibración antes de aceptar lecturas. Incluye activación de un gateway dentro del proceso y cierre de sesión para retomarlo después.
