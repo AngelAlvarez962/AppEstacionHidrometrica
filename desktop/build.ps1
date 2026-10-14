@@ -61,9 +61,10 @@ try {
  if(-not $NoCopy) {
   [IO.Directory]::CreateDirectory($taskProgram) | Out-Null
   Get-ChildItem -LiteralPath (Join-Path $taskBuiltOutput 'win-unpacked') -Force | Copy-Item -Destination $taskProgram -Recurse -Force
-  $taskLauncher='@echo off'+"`r`n"+'start "" "%~dp0Programa\Hackeando las inundaciones.exe"'+"`r`n"
+  Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'abrir-app.ps1') -Destination (Join-Path $taskOutput 'ABRIR.ps1') -Force
+  $taskLauncher='@echo off'+"`r`n"+'powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File "%~dp0ABRIR.ps1" -CarpetaVersion "%~dp0." -Version '+$taskVersion+"`r`n"+'if errorlevel 1 pause'+"`r`n"
   [IO.File]::WriteAllText((Join-Path $taskOutput 'ABRIR-ESTA-VERSION.cmd'),$taskLauncher,[Text.ASCIIEncoding]::new())
-  [IO.File]::WriteAllText((Join-Path $taskOutput 'LEEME.txt'),('Version '+$taskVersion+"`r`nAbre ABRIR-ESTA-VERSION.cmd. Conserva la carpeta Programa completa.`r`nCierra otras versiones de la app antes de abrir esta.`r`n"),[Text.UTF8Encoding]::new($false))
+  [IO.File]::WriteAllText((Join-Path $taskOutput 'LEEME.txt'),('Version '+$taskVersion+"`r`nAbre ABRIR-ESTA-VERSION.cmd: usa una copia rapida en el disco de cada PC.`r`nLa primera apertura puede tardar mientras copia desde la USB. Las siguientes no vuelven a copiar.`r`nConserva la carpeta Programa completa y ABRIR.ps1 junto al lanzador.`r`nCierra otras versiones de la app antes de abrir esta.`r`n"),[Text.UTF8Encoding]::new($false))
   [IO.File]::WriteAllText((Join-Path $taskVersions 'Actual.txt'),('v'+$taskVersion),[Text.UTF8Encoding]::new($false))
   [IO.Directory]::CreateDirectory($taskInstalled) | Out-Null
   Get-ChildItem -LiteralPath (Join-Path $taskBuiltOutput 'win-unpacked') -Force | Copy-Item -Destination $taskInstalled -Recurse -Force

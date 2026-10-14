@@ -1,6 +1,8 @@
 HACKEANDO LAS INUNDACIONES - VERSION 0.2.0 PARA WINDOWS X64
 
-Abre Hackeando las inundaciones.exe o ABRIR-ESTA-VERSION.cmd.
+Abre ABRIR-APP.cmd en la carpeta principal o ABRIR-ESTA-VERSION.cmd dentro de la version.
+Los lanzadores usan el disco de cada PC. En una PC nueva copian el programa una sola vez.
+Abrir directamente el EXE de la USB omite esta mejora y puede tardar mas.
 Conserva todos los archivos de esta carpeta juntos.
 No necesitas instalar Node.js para esta aplicacion compilada.
 
