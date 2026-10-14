@@ -6,8 +6,11 @@ Versión local **0.2.0**: tres presentaciones, expansión con gateways propios, 
 
 ## Abrir y trabajar
 
+Organización actual: `ABRIR-APP.cmd` en la carpeta principal; aplicaciones listas en `Aplicaciones/v0.2.0/Programa` y versión anterior en `Aplicaciones/v0.1.0`. El código está en `Codigo/EstacionHidrometrica`. Consulta `docs/ORGANIZACION.md`. Ya no se usan ni generan ZIP.
+
+
 - **ABRIR-APP-PC.cmd:** abre la copia completa de la aplicación para Windows. Consulta `docs/APP-PC.md`.
-- **COMPILAR-APP-PC.cmd:** genera el ZIP de carpeta para Windows x64.
+- **COMPILAR-APP-PC.cmd:** genera carpetas de aplicación por versión, sin ZIP.
 - **ABRIR-MONITOREO.cmd:** abre la aplicación compilada en el navegador. Mantén abierta la ventana del lanzador.
 - **DESARROLLAR.cmd:** abre la versión de desarrollo; los cambios de la interfaz se actualizan automáticamente.
 - **CONFIGURAR-CONEXION.cmd:** configura la clave privada en esta computadora. La URL y clave pública están en `config/public.json`; la clave privada se guarda en `%LOCALAPPDATA%\EstacionHidrometrica\<proyecto>\.env.local`, fuera de la USB.

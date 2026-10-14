@@ -2,6 +2,14 @@ param([switch]$NoCopy)
 $ErrorActionPreference='Stop'
 try {
  $taskRoot=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..'))
+ $taskVersion=(Get-Content -LiteralPath (Join-Path $PSScriptRoot 'package.json') -Raw | ConvertFrom-Json).version
+ if($taskVersion -notmatch '^\d+\.\d+\.\d+$') { throw 'Version de aplicacion invalida.' }
+ $taskParent=Split-Path -Parent $taskRoot
+ $taskOrganized=(Split-Path -Leaf $taskParent) -eq 'Codigo'
+ $taskWorkspace=if($taskOrganized){Split-Path -Parent $taskParent}else{$taskRoot}
+ $taskVersions=Join-Path $taskWorkspace $(if($taskOrganized){'Aplicaciones'}else{'aplicacion-pc'})
+ $taskOutput=Join-Path $taskVersions ('v'+$taskVersion)
+ $taskProgram=Join-Path $taskOutput 'Programa'
  $taskNode=Join-Path $env:ProgramFiles 'nodejs\node.exe'
  if(-not (Test-Path -LiteralPath $taskNode)) { $taskNode=(Get-Command node.exe -ErrorAction SilentlyContinue).Source }
  if(-not $taskNode) { throw 'Instala Node.js 22.12 o superior para compilar. La app compilada no lo necesita.' }
@@ -10,7 +18,8 @@ try {
  $taskInstalled=Join-Path $env:LOCALAPPDATA 'EstacionHidrometrica\App-PC'
  $taskExistingExe=Join-Path $taskInstalled 'Hackeando las inundaciones.exe'
  $taskBuildExe=Join-Path $taskToolsRoot 'salida\win-unpacked\Hackeando las inundaciones.exe'
- if(Get-CimInstance Win32_Process | Where-Object {$_.ExecutablePath -in @($taskExistingExe,$taskBuildExe)}) { throw 'Cierra la app de monitoreo antes de compilar una nueva version.' }
+ $taskVersionExe=Join-Path $taskProgram 'Hackeando las inundaciones.exe'
+ if(Get-CimInstance Win32_Process | Where-Object {$_.ExecutablePath -in @($taskExistingExe,$taskBuildExe,$taskVersionExe)}) { throw 'Cierra la app de monitoreo antes de compilar una nueva version.' }
  [IO.Directory]::CreateDirectory($taskToolsRoot) | Out-Null
  Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'tools-package.json') -Destination (Join-Path $taskToolsRoot 'package.json')
  if(-not (Test-Path -LiteralPath (Join-Path $taskToolsRoot 'node_modules\electron\dist\electron.exe')) -or -not (Test-Path -LiteralPath (Join-Path $taskToolsRoot 'node_modules\electron-builder\cli.js'))) {
@@ -37,8 +46,6 @@ try {
  }
  Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'package.json') -Destination (Join-Path $taskStage 'package.json')
  Copy-Item -LiteralPath (Join-Path $taskRoot 'dist') -Destination (Join-Path $taskStage 'dist') -Recurse
- $taskOutput=Join-Path $taskRoot 'aplicacion-pc'
- [IO.Directory]::CreateDirectory($taskOutput) | Out-Null
  $taskBuilderConfig=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'builder.json') -Raw | ConvertFrom-Json
  $taskBuiltOutput=Join-Path $taskToolsRoot 'salida'
  $taskBuilderConfig | Add-Member -NotePropertyName directories -NotePropertyValue @{app=$taskStage;output=$taskBuiltOutput}
@@ -49,14 +56,15 @@ try {
  $env:CSC_IDENTITY_AUTO_DISCOVERY='false'
  & $taskNode (Join-Path $taskToolsRoot 'node_modules\electron-builder\cli.js') --config $taskConfigFile --win --x64 --dir --publish never
  if($LASTEXITCODE -ne 0) { throw 'No se pudieron generar los ejecutables de Windows.' }
- $taskVersion=(Get-Content -LiteralPath (Join-Path $PSScriptRoot 'package.json') -Raw | ConvertFrom-Json).version
- $taskZipName='Hackeando-Inundaciones-PC-'+$taskVersion+'-Carpeta.zip'
- $taskZip=Join-Path $taskStage $taskZipName
- Add-Type -AssemblyName System.IO.Compression.FileSystem
  Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'LEEME-PC.txt') -Destination (Join-Path $taskBuiltOutput 'win-unpacked\LEEME-PC.txt') -Force
- [IO.Compression.ZipFile]::CreateFromDirectory((Join-Path $taskBuiltOutput 'win-unpacked'),$taskZip,[IO.Compression.CompressionLevel]::Fastest,$false)
+ [IO.File]::WriteAllText((Join-Path $taskBuiltOutput 'win-unpacked\VERSION.txt'),$taskVersion,[Text.UTF8Encoding]::new($false))
  if(-not $NoCopy) {
-  Copy-Item -LiteralPath $taskZip -Destination (Join-Path $taskOutput $taskZipName) -Force
+  [IO.Directory]::CreateDirectory($taskProgram) | Out-Null
+  Get-ChildItem -LiteralPath (Join-Path $taskBuiltOutput 'win-unpacked') -Force | Copy-Item -Destination $taskProgram -Recurse -Force
+  $taskLauncher='@echo off'+"`r`n"+'start "" "%~dp0Programa\Hackeando las inundaciones.exe"'+"`r`n"
+  [IO.File]::WriteAllText((Join-Path $taskOutput 'ABRIR-ESTA-VERSION.cmd'),$taskLauncher,[Text.ASCIIEncoding]::new())
+  [IO.File]::WriteAllText((Join-Path $taskOutput 'LEEME.txt'),('Version '+$taskVersion+"`r`nAbre ABRIR-ESTA-VERSION.cmd. Conserva la carpeta Programa completa.`r`nCierra otras versiones de la app antes de abrir esta.`r`n"),[Text.UTF8Encoding]::new($false))
+  [IO.File]::WriteAllText((Join-Path $taskVersions 'Actual.txt'),('v'+$taskVersion),[Text.UTF8Encoding]::new($false))
   [IO.Directory]::CreateDirectory($taskInstalled) | Out-Null
   Get-ChildItem -LiteralPath (Join-Path $taskBuiltOutput 'win-unpacked') -Force | Copy-Item -Destination $taskInstalled -Recurse -Force
  }

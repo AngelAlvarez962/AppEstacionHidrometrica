@@ -1,24 +1,21 @@
 HACKEANDO LAS INUNDACIONES - VERSION 0.2.0 PARA WINDOWS X64
 
-Extrae TODOS los archivos del ZIP en una carpeta. Abre "Hackeando las inundaciones.exe".
-No abras el ejecutable directamente dentro del ZIP ni lo separes de sus archivos.
+Abre Hackeando las inundaciones.exe o ABRIR-ESTA-VERSION.cmd.
+Conserva todos los archivos de esta carpeta juntos.
 No necesitas instalar Node.js para esta aplicacion compilada.
 
-En la laptop de desarrollo la conexion ya esta configurada en su perfil privado de Windows.
-En una computadora nueva puedes usar "Explorar demo de kits". Son ejemplos, no mediciones reales.
-Este ZIP NO incluye la clave privada de Supabase. No compartas esa clave con compradores.
-La conexion real para compradores requiere una API central, pendiente de habilitar.
+Esta es la version actual para pruebas; la version 0.1.0 es historica.
+En la laptop de desarrollo la conexion ya esta configurada en el perfil privado de Windows.
+En otra computadora sin conexion configurada puedes explorar la demo de kits.
+No incluye la clave privada de Supabase; no compartas esa clave con compradores.
 
-Se incluyen tres presentaciones de kits: estacion + gateway, solo estacion y solo gateway.
-Varias estaciones de una cuenta pueden compartir un gateway de esa misma cuenta.
-Una estacion nueva exige seleccionar gateway y completar las cuatro medidas.
-La distancia sensor a fondo es distinta de la altura maxima del agua.
-Ejemplo de cubeta: 65 cm sensor a fondo y 16 cm fondo a tope.
+Incluye las presentaciones estacion + gateway, solo estacion y solo gateway.
+Las estaciones de la misma cuenta pueden compartir su gateway.
+Una estacion nueva exige seleccionar gateway y completar sus cuatro medidas.
+Todavia falta probar el firmware y el gateway fisico con esta plataforma.
+Los avisos por correo estan preparados, pero aun no hay proveedor configurado.
+Los datos reales requieren Internet; no incluye el visualizador USB offline anterior.
 
-Todavia faltan probar el firmware y el gateway fisico con esta plataforma.
-Los avisos por correo estan preparados, pero el proveedor de envio aun no esta configurado.
-Para los datos reales se necesita Internet. Esta version no contiene el visualizador USB sin conexion.
-
-No se ha publicado una plataforma de descargas. Guarda el ZIP para tus pruebas.
-Los archivos completos y notas de desarrollo estan en la USB del proyecto.
-Si Windows impide abrirlo, no desactives sus protecciones; esa PC requiere revisar la firma del editor.
+Los archivos de desarrollo estan en Codigo\EstacionHidrometrica dentro de la USB.
+Esta organizacion usa carpetas por version, sin ZIP.
+Si Windows impide abrirlo, no desactives sus protecciones; esa PC requiere revisar la firma.

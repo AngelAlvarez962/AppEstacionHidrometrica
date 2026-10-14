@@ -4,9 +4,9 @@
 
 Ejecuta **ABRIR-APP-PC.cmd** desde la carpeta del proyecto en la USB. Abre la copia de Windows instalada en el perfil de esta laptop. La conexión de Supabase ya está configurada aquí. También puedes usar **ABRIR-MONITOREO.cmd** para la misma interfaz en el navegador.
 
-El ZIP actualizado es `aplicacion-pc/Hackeando-Inundaciones-PC-0.2.0-Carpeta.zip`. Extrae todos sus archivos juntos y abre **Hackeando las inundaciones.exe**. El ZIP incluye el programa y su runtime, pero no la clave privada de Supabase. En una computadora nueva funciona la demo; para trabajar con datos reales se necesita conectar el entorno de desarrollo de esa PC. No entregues la clave privada a compradores.
+La aplicación actual está en Aplicaciones/v0.2.0. Abre ABRIR-APP.cmd desde la carpeta principal de la USB o ABRIR-ESTA-VERSION.cmd dentro de esa versión. Los archivos necesarios están juntos en Programa; no hay que descomprimir nada. En otra PC sin configuración funciona la demo. La clave privada no va en la USB ni se entrega a compradores.
 
-No se publicó un sitio nuevo ni una plataforma de descargas. Para que compradores usen sus cuentas sin tener una clave privada, más adelante se conectará este mismo programa a una API central. Distribuir un ZIP y alojar la API son decisiones independientes.
+No se publicó un sitio nuevo ni una plataforma de descargas. Para que compradores usen sus cuentas sin tener una clave privada, más adelante se conectará este mismo programa a una API central. Compartir una carpeta de aplicación y alojar la API son decisiones independientes.
 
 ## Recorrido para probar
 

@@ -1,6 +1,6 @@
 # Estado del proyecto — laptop, 14 de octubre de 2026
 
-Versión 0.2.0. Fuente: E:\Estacion Hidrometrica Work\EstacionHidrometrica. Repositorio: AngelAlvarez962/AppEstacionHidrometrica. Supabase: monitoreo-rio-kits, ref njwxrnhfxjbtsxemrmol.
+Versión 0.2.0. Fuente: E:\Estacion Hidrometrica Work\Codigo\EstacionHidrometrica. Repositorio: AngelAlvarez962/AppEstacionHidrometrica. Supabase: monitoreo-rio-kits, ref njwxrnhfxjbtsxemrmol.
 
 Ya hay aplicación para navegador y Windows x64, inicio de sesión y primera cuenta administradora confirmada. Las catorce tablas tienen RLS. Migraciones 001 a 005 aplicadas; no repetirlas en esta base. Se conservan datos e historial existentes.
 
@@ -10,9 +10,9 @@ Se mantiene la separación entre entidades personales y clasificación privada d
 
 Los avisos por correo tienen preferencia por cuenta, cola privada, deduplicación y reintentos simulados. No hay proveedor ni envío real configurado. El adaptador usa Resend con variables privadas; los mensajes requieren Internet y servidor activo. No se envían avisos de desconexión aún. La autenticación por correo de Supabase es independiente.
 
-Paquete: aplicacion-pc/Hackeando-Inundaciones-PC-0.2.0-Carpeta.zip. Incluye ejecutable, runtime e instrucciones. Copia local actualizada en %LOCALAPPDATA%\EstacionHidrometrica\App-PC. ABRIR-APP-PC.cmd abre esa copia. Esta versión y su ZIP permanecen locales: no se subió a GitHub ni se creó una plataforma de descargas.
+Aplicación actual: Aplicaciones/v0.2.0/Programa, fuera del código. ABRIR-APP.cmd en la carpeta principal abre la versión actual. Aplicaciones/v0.1.0 conserva la anterior. El código está en Codigo/EstacionHidrometrica. Se quitaron los ZIP y el compilador ya no los genera. No se publicó una plataforma de descargas.
 
-La clave privada de Supabase permanece únicamente en el perfil de Windows de esta laptop, fuera de la USB, el ZIP y Git. En otra PC sin configuración funciona la demo. Para compradores hace falta una API central; no se les debe entregar una clave privada. Esta edición necesita Internet para datos reales y todavía no incorpora el visualizador USB sin conexión del proyecto anterior.
+La clave privada de Supabase permanece únicamente en el perfil de Windows de esta laptop, fuera de la USB y Git. En otra PC sin configuración funciona la demo. Para compradores hace falta una API central; no se les debe entregar una clave privada. Esta edición necesita Internet para datos reales y todavía no incorpora el visualizador USB sin conexión del proyecto anterior.
 
 Validación: pruebas automatizadas de cálculo, API, RLS, migración, expansión de kits, cola de correos, aislamiento de cuentas y protección de navegación de escritorio; compilación web y Windows. Pruebas visuales en demo de registro, medidas inválidas, Escape, activación de receptor y vuelta al panel. La ventana compilada de Windows abrió y mostró el monitoreo de ejemplo; cierre y arranque desde cero comprobados. No se crearon equipos de prueba ni lecturas ficticias en Supabase.
 
