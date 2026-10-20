@@ -1,6 +1,8 @@
-# Estado del proyecto — laptop, 14 de octubre de 2026
+# Estado del proyecto — laptop, 20 de octubre de 2026
 
-Versión 0.2.0. Fuente: E:\Estacion Hidrometrica Work\Codigo\EstacionHidrometrica. Repositorio: AngelAlvarez962/AppEstacionHidrometrica. Supabase: monitoreo-rio-kits, ref njwxrnhfxjbtsxemrmol.
+Versión 0.2.1. Fuente: E:\Estacion Hidrometrica Work\Codigo\EstacionHidrometrica. Repositorio: AngelAlvarez962/AppEstacionHidrometrica. Supabase: monitoreo-rio-kits, ref njwxrnhfxjbtsxemrmol.
+
+Navegación del 20 de octubre: Mis estaciones muestra primero tarjetas compactas; el detalle sólo se abre al pulsarlas. La vista de detalle incluye nivel, historial y acciones, con regreso al resumen que conserva filtro, desplazamiento y foco. Actualizar mantiene la estación abierta; cambiar de cuenta/apartado o eliminar la estación devuelve al resumen. Se comprobó en la demo local y se conservan los cálculos, permisos, firmware y configuración remota. Ver PRUEBAS-VERSION-0.2.1.md.
 
 Práctica física del 14 de octubre: se identificó COM3 como gateway de KIT-000001 y se configuró EST-000001 con distancia al fondo 62.3 cm (regla), capacidad 16 cm y avisos a 12/15 cm. El eco no está validado: la cubeta vacía dio unos 49–60 cm, aunque la regla indica 62.3 cm. No corregir esto usando 50.4 como fondo. Se preparó `firmware/practica-cubeta` con sketches y un puente USB de desarrollo; el parser y recepción por USB se probaron, pero publicar lecturas permanece desactivado. La herramienta de diagnóstico no sustituye un monitor USB offline integrado en la app. Los intentos de respaldo de flash se interrumpieron: no se cambió el firmware del gateway ni se afirma que exista un respaldo completo. La estación ya no está disponible; pendientes prueba física y envío real a la app. Ver `firmware/practica-cubeta/LEEME.md`.
 
@@ -12,7 +14,7 @@ Se mantiene la separación entre entidades personales y clasificación privada d
 
 Los avisos por correo tienen preferencia por cuenta, cola privada, deduplicación y reintentos simulados. No hay proveedor ni envío real configurado. El adaptador usa Resend con variables privadas; los mensajes requieren Internet y servidor activo. No se envían avisos de desconexión aún. La autenticación por correo de Supabase es independiente.
 
-Aplicación actual: Aplicaciones/v0.2.0/Programa, fuera del código. ABRIR-APP.cmd en la carpeta principal abre la versión actual. Aplicaciones/v0.1.0 conserva la anterior. El código está en Codigo/EstacionHidrometrica. Se quitaron los ZIP y el compilador ya no los genera. No se publicó una plataforma de descargas.
+Aplicación actual: Aplicaciones/v0.2.1/Programa, fuera del código. ABRIR-APP.cmd en la carpeta principal abre la versión actual. Aplicaciones/v0.2.0 y Aplicaciones/v0.1.0 conservan las anteriores. El código está en Codigo/EstacionHidrometrica. Se quitaron los ZIP y el compilador ya no los genera. No se publicó una plataforma de descargas.
 
 Arranque: ambos lanzadores (principal y por versión) seleccionan la copia local del disco. En una PC nueva preparan una copia por versión una sola vez, con verificación del paquete; no copian en cada apertura. La ventana observada el 14 de octubre se ejecutaba desde la USB porque el lanzador por versión abría directamente el EXE. Se corrigieron los lanzadores de 0.1.0 y 0.2.0 y el compilador para conservar la mejora. No se recompiló ni cambió el programa 0.2.0, sus datos o sesión; se actualizó la forma de abrirlo. Falta que el usuario cierre la ventana de USB y mida la apertura normal. Las pruebas del lanzador y de protección de navegación pasaron.
 

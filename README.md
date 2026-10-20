@@ -2,11 +2,11 @@
 
 Aplicación web de monitoreo hidrométrico para compradores de kits. Proyecto de trabajo guardado en la USB; repositorio: **AngelAlvarez962/AppEstacionHidrometrica**.
 
-Versión local **0.2.0**: tres presentaciones, expansión con gateways propios, identificadores cortos, registro obligatorio y cola de avisos. Consulta `docs/PRUEBAS-VERSION-0.2.md` para probarla. El proveedor de correo y la integración de hardware siguen pendientes.
+Versión local **0.2.1**: navegación de tarjetas a detalle con regreso al resumen. Conserva tres presentaciones, expansión con gateways propios, identificadores cortos, registro obligatorio y cola de avisos. Consulta `docs/PRUEBAS-VERSION-0.2.1.md` para probar la navegación y `docs/PRUEBAS-VERSION-0.2.md` para las funciones de kits. El proveedor de correo y la integración de hardware siguen pendientes.
 
 ## Abrir y trabajar
 
-Organización actual: `ABRIR-APP.cmd` en la carpeta principal; aplicaciones listas en `Aplicaciones/v0.2.0/Programa` y versión anterior en `Aplicaciones/v0.1.0`. El código está en `Codigo/EstacionHidrometrica`. Consulta `docs/ORGANIZACION.md`. Ya no se usan ni generan ZIP.
+Organización actual: `ABRIR-APP.cmd` en la carpeta principal; aplicaciones listas en `Aplicaciones/v0.2.1/Programa` y versiones anteriores en `Aplicaciones/v0.2.0` y `Aplicaciones/v0.1.0`. El código está en `Codigo/EstacionHidrometrica`. Consulta `docs/ORGANIZACION.md`. Ya no se usan ni generan ZIP.
 
 
 - **ABRIR-APP-PC.cmd:** abre la copia completa de la aplicación para Windows. Consulta `docs/APP-PC.md`.

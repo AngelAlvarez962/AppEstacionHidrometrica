@@ -1,4 +1,4 @@
-HACKEANDO LAS INUNDACIONES - VERSION 0.2.0 PARA WINDOWS X64
+HACKEANDO LAS INUNDACIONES - VERSION 0.2.1 PARA WINDOWS X64
 
 Abre ABRIR-APP.cmd en la carpeta principal o ABRIR-ESTA-VERSION.cmd dentro de la version.
 Los lanzadores usan el disco de cada PC. En una PC nueva copian el programa una sola vez.
@@ -6,10 +6,13 @@ Abrir directamente el EXE de la USB omite esta mejora y puede tardar mas.
 Conserva todos los archivos de esta carpeta juntos.
 No necesitas instalar Node.js para esta aplicacion compilada.
 
-Esta es la version actual para pruebas; la version 0.1.0 es historica.
+Esta es la version actual para pruebas. Las versiones anteriores se conservan por separado.
 En la laptop de desarrollo la conexion ya esta configurada en el perfil privado de Windows.
 En otra computadora sin conexion configurada puedes explorar la demo de kits.
 No incluye la clave privada de Supabase; no compartas esa clave con compradores.
+
+En Mis estaciones veras primero tarjetas de resumen. Pulsa una para abrir su nivel,
+historial y configuracion. Usa Volver a mis estaciones para regresar conservando el filtro.
 
 Incluye las presentaciones estacion + gateway, solo estacion y solo gateway.
 Las estaciones de la misma cuenta pueden compartir su gateway.
