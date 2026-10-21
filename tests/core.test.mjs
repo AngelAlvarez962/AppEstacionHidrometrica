@@ -1,10 +1,21 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {calibration,measurement,validCode} from '../src/core.js';
+import {calibration,measurement,sensorDistance,validCode} from '../src/core.js';
 import {DemoStore} from '../src/demo.js';
 import {authStorage} from '../src/auth-storage.js';
 const cfg={bed_height:65,capacity_height:16,yellow_alert:12,red_alert:15};
 const reading=(distance,status='OK')=>({distance_cm:distance,sensor_status:status,received_at:new Date().toISOString()});
+
+test('la distancia real permanece visible aunque el nivel calculado sea cero o falten medidas',()=>{
+ const actual=reading(68.5);
+ assert.equal(sensorDistance(actual).distance,68.5);
+ assert.equal(measurement({bed_height:62.3,capacity_height:16,yellow_alert:12,red_alert:15},actual).level,0);
+ assert.equal(measurement({...cfg,bed_height:null},actual).state,'uncalibrated');
+ assert.equal(sensorDistance(actual).distance,68.5);
+});
+test('no presenta una distancia antigua o un error como medición actual',()=>{
+ for(const data of [null,reading(0,'SIN_ECO'),reading(10),reading('NaN'),{...reading(68.5),received_at:new Date(Date.now()-91000).toISOString()}])assert.equal(sensorDistance(data).distance,undefined);
+});
 test('nivel y porcentaje utilizan alturas diferentes',()=>{
   for(const [distance,level,percent,state] of [[65,0,0,'normal'],[57,8,50,'normal'],[53,12,75,'yellow'],[50,15,93.75,'red'],[49,16,100,'red']]){
     const result=measurement(cfg,reading(distance));assert.equal(result.level,level);assert.equal(result.percent,percent);assert.equal(result.state,state);

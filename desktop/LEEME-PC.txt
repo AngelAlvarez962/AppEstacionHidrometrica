@@ -1,4 +1,4 @@
-HACKEANDO LAS INUNDACIONES - VERSION 0.2.1 PARA WINDOWS X64
+HACKEANDO LAS INUNDACIONES - VERSION 0.2.2 PARA WINDOWS X64
 
 Abre ABRIR-APP.cmd en la carpeta principal o ABRIR-ESTA-VERSION.cmd dentro de la version.
 Los lanzadores usan el disco de cada PC. En una PC nueva copian el programa una sola vez.
@@ -13,11 +13,15 @@ No incluye la clave privada de Supabase; no compartas esa clave con compradores.
 
 En Mis estaciones veras primero tarjetas de resumen. Pulsa una para abrir su nivel,
 historial y configuracion. Usa Volver a mis estaciones para regresar conservando el filtro.
+La distancia medida por el sensor se muestra directamente en la tarjeta y en el detalle.
+El nivel de agua se calcula por separado con las medidas guardadas de cada instalacion.
+La recuperacion de contrasena mantiene abierto el formulario hasta completar el cambio.
 
 Incluye las presentaciones estacion + gateway, solo estacion y solo gateway.
 Las estaciones de la misma cuenta pueden compartir su gateway.
 Una estacion nueva exige seleccionar gateway y completar sus cuatro medidas.
-Todavia falta probar el firmware y el gateway fisico con esta plataforma.
+En esta laptop se comprobo el enlace de Tacotalpa por gateway USB a la plataforma.
+El acceso Tacotalpa - monitoreo inicia su puente personal; no incluye ese perfil en el paquete.
 Los avisos por correo estan preparados, pero aun no hay proveedor configurado.
 Los datos reales requieren Internet; no incluye el visualizador USB offline anterior.
 

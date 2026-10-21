@@ -8,11 +8,16 @@ export function calibration(input) {
   if (!Object.values(out).every(Number.isFinite) || out.bed_height <= 20 || out.bed_height > 600 || out.capacity_height <= 0 || out.capacity_height > out.bed_height || out.yellow_alert < 0 || out.yellow_alert >= out.red_alert || out.red_alert > out.capacity_height) throw Error('Usa sensor a fondo > 20 y ≤ 600 cm; 0 < fondo a tope ≤ sensor a fondo; amarilla < roja ≤ fondo a tope.');
   return out;
 }
-export function measurement(station, reading, now = Date.now()) {
+export function sensorDistance(reading, now = Date.now()) {
   if (!reading) return {state:'waiting',label:'Sin lecturas'};
   const age = now - Date.parse(reading.received_at);
   if (!Number.isFinite(age) || age < -5000 || age > 90000) return {state:'offline',label:'Sin señal reciente'};
   if (reading.sensor_status !== 'OK' || !Number.isFinite(Number(reading.distance_cm)) || Number(reading.distance_cm) <= 20 || Number(reading.distance_cm) > 600) return {state:'error',label:'Error de sensor'};
+  return {state:'current',label:'Lectura reciente',distance:Number(reading.distance_cm)};
+}
+export function measurement(station, reading, now = Date.now()) {
+  const sensed=sensorDistance(reading,now);
+  if(sensed.distance===undefined)return sensed;
   if (station.bed_height === null || station.bed_height === undefined) return {state:'uncalibrated',label:'Configura las medidas'};
   let cfg;
   try { cfg = calibration(station); } catch (_) { return {state:'uncalibrated',label:'Configura las medidas'}; }

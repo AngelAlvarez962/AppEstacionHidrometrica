@@ -12,3 +12,18 @@
 @media(max-width:620px){.detail-navigation{gap:10px;flex-wrap:wrap}.detail-navigation>span{font-size:10px}}
 
 .detail-heading h1{font-size:24px;letter-spacing:-.5px;margin:8px 0}
+.sensor-distance{margin:4px 0 15px;padding:14px 15px;background:#edf9fc;border:1px solid #d0eaf1;border-radius:12px}
+.sensor-distance>span{display:block;color:#365e73;font-size:11px;font-weight:650}
+.sensor-distance>div{display:flex;align-items:baseline;gap:6px;margin:5px 0}
+.sensor-distance strong{font-size:34px;line-height:1.2;color:#006f93;letter-spacing:-1px;font-variant-numeric:tabular-nums}
+.sensor-distance>div span{font-size:13px;color:var(--muted)}
+.sensor-distance small{display:block;color:var(--muted);font-size:10px;line-height:1.5}
+.station-card .card-level strong{font-size:23px}
+.card-level .calculated-label{margin:0 0 4px;font-size:10px;color:var(--muted)}
+.detail-sensor{display:flex;align-items:center;gap:24px;margin-top:20px;padding:18px 20px;background:#edf9fc;border:1px solid #d0eaf1;border-radius:13px}
+.detail-sensor>div:first-child{min-width:180px}
+.detail-sensor span{display:block;color:#365e73;font-size:12px;font-weight:650}
+.detail-sensor strong{font-size:38px;color:#006f93;font-variant-numeric:tabular-nums}
+.detail-sensor b{font-size:13px;font-weight:400;color:var(--muted);margin-left:6px}
+.detail-sensor p{margin:5px 0;color:var(--muted);font-size:12px;line-height:1.5}
+@media(max-width:620px){.detail-sensor{align-items:flex-start;flex-direction:column;gap:8px}.detail-sensor strong{font-size:34px}}

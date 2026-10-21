@@ -64,5 +64,14 @@ try {
  }
  $taskApp=Join-Path $taskSelected $taskExeName
  if($Preparar){Write-Output ('Aplicacion preparada: '+$taskApp);exit 0}
- Start-Process -FilePath $taskApp -WorkingDirectory $taskSelected -WindowStyle Normal
+ $taskOpened=Start-Process -FilePath $taskApp -WorkingDirectory $taskSelected -WindowStyle Normal -PassThru
+ # Optional personal USB bridge, installed separately on the developer PC.
+ # No service-role key, buyer identity or COM association travels in the app.
+ $taskUsb=Join-Path $env:LOCALAPPDATA 'EstacionHidrometrica\Gateway-USB\Supervisor_Gateway_USB.ps1'
+ if(Test-Path -LiteralPath $taskUsb) {
+  $taskExisting=Get-Process -Name 'Hackeando las inundaciones' -ErrorAction SilentlyContinue | Where-Object {$_.Path -eq $taskApp} | Sort-Object StartTime | Select-Object -First 1
+  $taskAppPid=if($taskExisting){$taskExisting.Id}else{$taskOpened.Id}
+  $taskPs=Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe'
+  Start-Process -FilePath $taskPs -ArgumentList @('-NoLogo','-NoProfile','-ExecutionPolicy','Bypass','-File',('"'+$taskUsb+'"'),'-ProcesoAppId',"$taskAppPid") -WindowStyle Hidden
+ }
 } catch {Write-Host $_.Exception.Message -ForegroundColor Red;exit 1}

@@ -1,13 +1,29 @@
-param([string]$Puerto='COM3',[switch]$SoloLectura,[switch]$ProbarParser)
+param([string]$Puerto='COM3',[switch]$SoloLectura,[switch]$ProbarParser,
+ [string]$Configuracion,[int]$ProcesoAppId=0,[int]$MaxGuardadas=0,[string]$Registro)
 $ErrorActionPreference='Stop'
 if($PSVersionTable.PSEdition -eq 'Core') {
  $taskLegacyArgs=@('-NoProfile','-ExecutionPolicy','Bypass','-File',$PSCommandPath,'-Puerto',$Puerto)
  if($SoloLectura) {$taskLegacyArgs+='-SoloLectura'}
  if($ProbarParser) {$taskLegacyArgs+='-ProbarParser'}
+ if($Configuracion) {$taskLegacyArgs+=@('-Configuracion',$Configuracion)}
+ if($ProcesoAppId) {$taskLegacyArgs+=@('-ProcesoAppId',"$ProcesoAppId")}
+ if($MaxGuardadas) {$taskLegacyArgs+=@('-MaxGuardadas',"$MaxGuardadas")}
+ if($Registro) {$taskLegacyArgs+=@('-Registro',$Registro)}
  & (Join-Path $env:SystemRoot 'System32\WindowsPowerShell\v1.0\powershell.exe') @taskLegacyArgs
  exit $LASTEXITCODE
 }
-$taskConfig=Get-Content -LiteralPath (Join-Path $PSScriptRoot 'configuracion.json') -Raw | ConvertFrom-Json
+if(-not $Configuracion) {$Configuracion=Join-Path $PSScriptRoot 'configuracion.json'}
+$taskConfig=Get-Content -LiteralPath $Configuracion -Raw | ConvertFrom-Json
+function Write-UsbLog([string]$Text,[string]$Color='Gray') {
+ Write-Host $Text -ForegroundColor $Color
+ if($Registro) {
+  # Bounded local log: measurements and status only; never credentials.
+  if((Test-Path -LiteralPath $Registro) -and (Get-Item -LiteralPath $Registro).Length -gt 2097152) {
+   Move-Item -LiteralPath $Registro -Destination ($Registro+'.anterior') -Force
+  }
+  Add-Content -LiteralPath $Registro -Value ((Get-Date -Format 'yyyy-MM-dd HH:mm:ss')+' '+$Text) -Encoding UTF8
+ }
+}
 
 function Convert-GatewayLine([string]$Line) {
  if($Line.Length -gt 192 -or $Line -notmatch '^RX:\s*(?<node>EST-[A-F0-9]{16}|RIO_[0-9]{2}),(?<distance>[0-9]+(?:\.[0-9]+)?),(?<status>OK|ERR_CABLE|ERR_CORTO|SIN_ECO|MUY_CERCA|FUERA_RANGO|ERR_DESBORDE),(?<packet>[0-9]+)\s*\|\s*RSSI:\s*(?<rssi>-?[0-9]+)\s*dBm\s*$') {return $null}
@@ -21,10 +37,15 @@ function Convert-GatewayLine([string]$Line) {
 }
 
 if($ProbarParser) {
- $taskValid=Convert-GatewayLine 'RX: RIO_01,54.3,OK,18 | RSSI: -77 dBm'
- if(-not $taskValid -or $taskValid.distance_cm -ne 54.3 -or $taskValid.packet -ne 18) {throw 'No se reconoce la trama de la practica'}
- foreach($taskBad in @('RX: RIO_02,54.3,OK,18 | RSSI: -77 dBm','RX: RIO_01,NaN,OK,18 | RSSI: -77 dBm','RX: RIO_01,54.3,OK,18 | RSSI: -250 dBm','RX: RIO_01,54.3,OK,99999999999999999999 | RSSI: -77 dBm')) {
+ $taskValid=Convert-GatewayLine ('RX: '+$taskConfig.legacy_node_id+',54.3,OK,18 | RSSI: -77 dBm')
+ if(-not $taskValid -or $taskValid.distance_cm -ne 54.3 -or $taskValid.packet -ne 18) {throw 'No se reconoce la trama del equipo vinculado'}
+ foreach($taskBad in @('RX: NODE,NaN,OK,18 | RSSI: -77 dBm','RX: NODE,54.3,OK,18 | RSSI: -250 dBm','RX: NODE,54.3,OK,99999999999999999999 | RSSI: -77 dBm','RX: NODE,54.3,INVENTADO,18 | RSSI: -77 dBm')) {
+  $taskBad=$taskBad.Replace('NODE',$taskConfig.legacy_node_id)
   if($null -ne (Convert-GatewayLine $taskBad)) {throw 'Se acepto una trama invalida o de otra estacion'}
+ }
+ foreach($taskOtherNode in @('RIO_01','RIO_02','RIO_99')) {
+  if($taskOtherNode -eq $taskConfig.legacy_node_id) {continue}
+  if($null -ne (Convert-GatewayLine ('RX: '+$taskOtherNode+',54.3,OK,18 | RSSI: -77 dBm'))) {throw 'Se acepto otro nodo de radio'}
  }
  Write-Output 'OK: trama real, distancia decimal, contador, RSSI y rechazo de otras estaciones.'
  exit 0
@@ -36,7 +57,9 @@ try {
  if(-not $SoloLectura -and $taskConfig.sensor_validated) {
   # Developer-PC bridge only. The Supabase secret remains in this PC's profile.
   $taskProject=[IO.Path]::GetFullPath((Join-Path $PSScriptRoot '..\..'))
-  $taskPublic=Get-Content -LiteralPath (Join-Path $taskProject 'config\public.json') -Raw | ConvertFrom-Json
+  $taskPublicPath=Join-Path (Split-Path -Parent $Configuracion) 'public.json'
+  if(-not (Test-Path -LiteralPath $taskPublicPath)) {$taskPublicPath=Join-Path $taskProject 'config\public.json'}
+  $taskPublic=Get-Content -LiteralPath $taskPublicPath -Raw | ConvertFrom-Json
   $taskPrivate=Join-Path $env:LOCALAPPDATA ('EstacionHidrometrica\'+$taskPublic.project_ref+'\.env.local')
   $taskSecretLine=@(Get-Content -LiteralPath $taskPrivate | Where-Object {$_ -match '^SUPABASE_SECRET_KEY='})
   if($taskSecretLine.Count -ne 1) {throw 'Configura primero la conexion privada de esta computadora.'}
@@ -49,6 +72,10 @@ try {
   foreach($taskField in @('bed_height','capacity_height','yellow_alert','red_alert')) {
    if($null -eq $taskStation[0].$taskField -or [Math]::Abs([double]$taskStation[0].$taskField-[double]$taskConfig.$taskField) -gt 0.01) {throw 'La calibracion de la app no coincide con la practica. Actualiza ambas antes de publicar.'}
   }
+  $taskGateway=@(Invoke-RestMethod -Uri ($taskBase+'kit_gateways?id=eq.'+$taskConfig.gateway_id+'&select=kit_id') -Headers $taskHeaders -UserAgent 'EstacionHidrometrica-USB/0.2.1' -TimeoutSec 10)
+  if($taskGateway.Count -ne 1) {throw 'No se encontro el gateway configurado.'}
+  $taskGatewayKit=@(Invoke-RestMethod -Uri ($taskBase+'kit_kits?id=eq.'+$taskGateway[0].kit_id+'&select=owner_id') -Headers $taskHeaders -UserAgent 'EstacionHidrometrica-USB/0.2.1' -TimeoutSec 10)
+  if($taskGatewayKit.Count -ne 1 -or $taskGatewayKit[0].owner_id -ne $taskConfig.owner_id) {throw 'El gateway no pertenece al propietario de esta practica.'}
   $taskKit=@(Invoke-RestMethod -Uri ($taskBase+'kit_kits?id=eq.'+$taskStation[0].kit_id+'&select=owner_id') -Headers $taskHeaders -UserAgent 'EstacionHidrometrica-USB/0.2.0' -TimeoutSec 10)
   if($taskKit.Count -ne 1 -or $taskKit[0].owner_id -ne $taskConfig.owner_id) {throw 'No corresponde al propietario configurado para esta practica.'}
   $taskKey=@(Invoke-RestMethod -Uri ($taskBase+'kit_gateway_keys?gateway_id=eq.'+$taskConfig.gateway_id+'&revoked_at=is.null&select=token_hash') -Headers $taskHeaders -UserAgent 'EstacionHidrometrica-USB/0.2.0' -TimeoutSec 10)
@@ -90,12 +117,18 @@ public sealed class HydroUsbReader : IDisposable {
 '@
  }
  $taskReader=New-Object HydroUsbReader $Puerto
- Write-Host ('Gateway conectado: '+$Puerto+' a 115200 baudios.') -ForegroundColor Cyan
- if(-not $taskDeviceHash) {Write-Host 'SOLO DIAGNOSTICO: falta confirmar el eco al fondo. No se envian datos a la nube.' -ForegroundColor Yellow}
- else {Write-Host 'Lecturas reales hacia EST-000001. Deja abierta tambien tu aplicacion.' -ForegroundColor Green}
- Write-Host 'Para terminar: Ctrl+C o cerrar esta ventana. Cierra este lector antes de cargar firmware.'
+ Write-UsbLog ('Gateway conectado: '+$Puerto+' a 115200 baudios.') 'Cyan'
+ if(-not $taskDeviceHash) {Write-UsbLog 'SOLO DIAGNOSTICO: no se envian datos a la nube.' 'Yellow'}
+ else {Write-UsbLog ('Lecturas reales de '+$taskConfig.legacy_node_id+' hacia EST-000001.') 'Green'}
+ Write-UsbLog 'Cerrar la app detiene el puente cuando se inicia desde su lanzador.'
  $taskNextAttempt=[DateTime]::MinValue
+ $taskNextProcessCheck=[DateTime]::MinValue
+ $taskSaved=0
  while(-not $taskReader.Failed) {
+  if($ProcesoAppId -and [DateTime]::UtcNow -ge $taskNextProcessCheck) {
+   if(-not (Get-Process -Id $ProcesoAppId -ErrorAction SilentlyContinue)) {Write-UsbLog 'App cerrada. Puerto liberado.';break}
+   $taskNextProcessCheck=[DateTime]::UtcNow.AddSeconds(2)
+  }
   $taskLast=$null;$taskLine=$taskReader.Take()
   while($null -ne $taskLine) {
    $taskParsed=Convert-GatewayLine $taskLine.Text
@@ -104,17 +137,19 @@ public sealed class HydroUsbReader : IDisposable {
   }
   if($null -eq $taskLast) {Start-Sleep -Milliseconds 30;continue}
   $taskDistanceText=$taskLast.distance_cm.ToString('0.0',[Globalization.CultureInfo]::InvariantCulture)
-  Write-Host ('USB: '+$taskDistanceText+' cm | '+$taskLast.sensor_status+' | RSSI '+$taskLast.rssi)
+  Write-UsbLog ('USB: '+$taskDistanceText+' cm | '+$taskLast.sensor_status+' | RSSI '+$taskLast.rssi)
   if(-not $taskDeviceHash -or [DateTime]::UtcNow -lt $taskNextAttempt) {continue}
   $taskBody=@{p_hash=$taskDeviceHash;p_station_serial=$taskConfig.station_serial;p_distance=$taskLast.distance_cm;p_status=$taskLast.sensor_status;p_packet=$taskLast.packet;p_rssi=$taskLast.rssi} | ConvertTo-Json -Compress
   try {
    Invoke-RestMethod -Uri ($taskBase+'rpc/kit_ingest') -Method Post -Headers $taskHeaders -UserAgent 'EstacionHidrometrica-USB/0.2.0' -Body $taskBody -TimeoutSec 8 | Out-Null
-   Write-Host 'Guardada en tu aplicacion.' -ForegroundColor Green
+   $taskSaved++
+   Write-UsbLog 'Guardada en tu aplicacion por Internet.' 'Green'
+   if($MaxGuardadas -gt 0 -and $taskSaved -ge $MaxGuardadas) {break}
   } catch {
-   Write-Host 'No se pudo guardar. Se sigue recibiendo USB; reintento con lecturas recientes en 10 s.' -ForegroundColor Yellow
+   Write-UsbLog 'No se pudo guardar. Se sigue recibiendo USB; reintento con lecturas recientes en 10 s.' 'Yellow'
    $taskNextAttempt=[DateTime]::UtcNow.AddSeconds(10)
   }
  }
- throw 'Se interrumpio la conexion USB. Revisa el cable y vuelve a abrir el lector.'
-} catch {Write-Host $_.Exception.Message -ForegroundColor Red;exit 1}
+ if($taskReader.Failed) {throw 'Se interrumpio la conexion USB. Revisa el cable y vuelve a abrir el lector.'}
+} catch {Write-UsbLog 'No se pudo conectar el gateway con la app. Revisa COM, Internet y el perfil de esta PC.' 'Red';if($ProcesoAppId){return};exit 1}
 finally {if($taskReader){$taskReader.Dispose()};$taskDeviceHash=$null;$taskHeaders=$null}

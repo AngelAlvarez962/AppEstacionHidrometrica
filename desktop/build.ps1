@@ -19,7 +19,8 @@ try {
  $taskExistingExe=Join-Path $taskInstalled 'Hackeando las inundaciones.exe'
  $taskBuildExe=Join-Path $taskToolsRoot 'salida\win-unpacked\Hackeando las inundaciones.exe'
  $taskVersionExe=Join-Path $taskProgram 'Hackeando las inundaciones.exe'
- if(Get-CimInstance Win32_Process | Where-Object {$_.ExecutablePath -in @($taskExistingExe,$taskBuildExe,$taskVersionExe)}) { throw 'Cierra la app de monitoreo antes de compilar una nueva version.' }
+ $taskBusyPaths=if($NoCopy){@($taskBuildExe)}else{@($taskExistingExe,$taskBuildExe,$taskVersionExe)}
+ if(Get-CimInstance Win32_Process | Where-Object {$_.ExecutablePath -in $taskBusyPaths}) { throw 'Cierra la app de monitoreo antes de compilar una nueva version.' }
  [IO.Directory]::CreateDirectory($taskToolsRoot) | Out-Null
  Copy-Item -LiteralPath (Join-Path $PSScriptRoot 'tools-package.json') -Destination (Join-Path $taskToolsRoot 'package.json')
  if(-not (Test-Path -LiteralPath (Join-Path $taskToolsRoot 'node_modules\electron\dist\electron.exe')) -or -not (Test-Path -LiteralPath (Join-Path $taskToolsRoot 'node_modules\electron-builder\cli.js'))) {

@@ -1,7 +1,7 @@
 {
   "name": "estacion-hidrometrica-pc",
   "productName": "Hackeando las inundaciones",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "Monitoreo hidrométrico para Windows",
   "author": "AngelAlvarez962",
   "private": true,
