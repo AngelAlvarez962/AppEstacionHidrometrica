@@ -35,8 +35,18 @@ async function start(){
   const site=JSON.parse(await readFile(path.join(__dirname,'site.json'),'utf8'));
   trustedUrl=cloudUrl(site.webUrl)||await localUrl();
   window=new BrowserWindow({width:1280,height:860,minWidth:840,minHeight:620,show:false,title:'Hackeando las inundaciones · Monitoreo',backgroundColor:'#f4fafc',icon:path.join(__dirname,'icon.png'),webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true}});
-  window.webContents.session.setPermissionRequestHandler((_contents,_permission,callback)=>callback(false));
-  window.webContents.session.setPermissionCheckHandler(()=>false);
+  window.webContents.session.setPermissionRequestHandler((contents,permission,callback,details)=>callback(permission==='serial'&&contents===window.webContents&&sameOrigin(details.requestingUrl||contents.getURL(),trustedUrl)));
+  window.webContents.session.setPermissionCheckHandler((contents,permission,origin)=>permission==='serial'&&contents===window.webContents&&sameOrigin(origin,trustedUrl));
+  window.webContents.session.on('select-serial-port',async(event,ports,contents,callback)=>{
+    event.preventDefault();
+    if(contents!==window.webContents||!sameOrigin(contents.getURL(),trustedUrl)){callback('');return;}
+    const compatible=ports.filter(p=>['10c4','1a86','303a'].includes(String(p.vendorId||'').toLowerCase().replace(/^0x/,''))).slice(0,8);
+    if(!compatible.length){callback('');return;}
+    try{
+      const choice=await dialog.showMessageBox(window,{type:'question',title:'Conecta tu gateway',message:'Selecciona el puerto del gateway que conectaste.',detail:'La app sólo usará el puerto que elijas. Si no lo reconoces, cancela y desconecta otros receptores.',buttons:[...compatible.map(p=>p.portName+' · '+(p.displayName||'Receptor USB')),'Cancelar'],defaultId:compatible.length,cancelId:compatible.length,noLink:true});
+      callback(compatible[choice.response]?.portId||'');
+    }catch{callback('');}
+  });
   window.webContents.setWindowOpenHandler(()=>({action:'deny'}));
   window.webContents.on('will-navigate',(event,url)=>{if(!sameOrigin(url,trustedUrl))event.preventDefault();});
   window.webContents.on('will-redirect',(event,url)=>{if(!sameOrigin(url,trustedUrl))event.preventDefault();});

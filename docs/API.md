@@ -101,3 +101,18 @@ Preparación: `POST /api/kits` con `action: "create"` y `kind: "complete" | "sta
 Configuración: `PATCH /api/kits`, `action: "station"`, ahora requiere `gateway_id` junto con nombre y las cuatro medidas. La base exige que el gateway sea del mismo propietario. La estación conserva su kit aunque use el gateway de otra compra. `setup_pending` es un valor calculado por la base; el cliente no puede falsearlo. Una estación pendiente o eliminada no acepta ingesta.
 
 Correo: `PATCH /api/kits`, `action: "email-preference"`, `enabled: true/false`. Se modifica solo el perfil del usuario verificado. No acepta un destinatario elegido por el cliente. Los envíos necesitan proveedor y servidor activo; no están configurados todavía.
+
+
+## Conexión de gateway (0.3.0)
+
+Todas las acciones de cuenta conservan el JWT y correo confirmado. `POST remember-gateway` acepta `id`, `expected` (UUID anterior o null), `confirm` y `station_ids`. `kit_connect_gateway` comprueba propiedad y estado previo, bloquea el perfil y las estaciones seleccionadas y guarda el cambio como una transacción. Una selección ajena, un cambio concurrente o la ausencia de confirmación no modifica nada.
+
+`POST usb-lease` con `id` permite al lector de la UI tomar temporalmente el puerto del lector personal de Windows; caduca a los 45 segundos y se renueva mientras está conectado. No abre puertos mediante nombres recibidos del navegador. `POST usb-reading` comprueba gateway propio y serie/alias/estado válidos antes de ingerir. No devuelve hashes ni credenciales del servidor.
+
+`POST gateway-prepare` con `id` y pista `hardware` comprueba propiedad y hasta ocho estaciones configuradas con alias distintos. Genera una credencial nueva de 256 bits y una confirmación aleatoria. Devuelve la configuración sólo a esa sesión; guarda únicamente hashes y una caducidad de diez minutos. La contraseña del Wi-Fi no pasa por esta API: va al gateway por USB.
+
+`POST gateway-finish` con `id`, `ticket` y `proof` comprueba la confirmación del dispositivo y activa la credencial pendiente. No se invalida la anterior si el guardado no se confirma. `PATCH guide` con `completed` guarda el avance en el perfil propio.
+
+`PATCH station` ahora exige `expected_gateway` igual al gateway actual y `confirm_gateway: true` si se cambia un receptor existente. La escritura incluye una comparación del valor anterior para rechazar cambios concurrentes.
+
+Ingesta directa del equipo: `POST https://<proyecto>.supabase.co/rest/v1/rpc/kit_receive`, con `apikey` pública y cuerpo `p_token`, `p_station_serial`, `p_distance`, `p_status`, `p_packet`, `p_rssi`. La credencial de gateway aleatoria se verifica por SHA256; no es una sesión de usuario. La función sólo escribe estaciones vinculadas activas y configuradas. Los reintentos o duplicados simultáneos USB/Wi-Fi de la misma muestra en 30 s no crean otra fila. `internet_last_seen` se actualiza sólo por esta vía directa; la UI requiere una recepción posterior a `internet_configured_at` para indicar Internet comprobado.

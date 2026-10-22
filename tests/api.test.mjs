@@ -23,10 +23,10 @@ test('no permite usuarios sin correo confirmado ni creación sin rol admin',asyn
   await makeHandler('kits',{env,fetcher})(req('POST',{action:'create',station_count:1}),r);assert.equal(r.code,403);
 });
 test('edición utiliza JWT del comprador, RLS y lista permitida de campos',async()=>{
-  const calls=[];const fetcher=async(url,options)=>{calls.push({url,options});return response(url.endsWith('/auth/v1/user')?{id:owner,email_confirmed_at:'now'}:[{id:station}])};
-  const r=res();await makeHandler('kits',{env,fetcher})(req('PATCH',{action:'station',id:station,name:'Cubeta',location:'Pruebas',bed_height:65,capacity_height:16,yellow_alert:12,red_alert:15,gateway_id:owner,serial:'AJENA'}),r);
-  assert.equal(r.code,200);assert.equal(calls[1].options.headers.Authorization,'Bearer '+bearer);assert.equal(calls[1].options.headers.apikey,env.SUPABASE_PUBLISHABLE_KEY);
-  const patch=JSON.parse(calls[1].options.body);assert.equal(patch.gateway_id,owner);assert.equal(patch.serial,undefined);
+  const calls=[];const fetcher=async(url,options)=>{calls.push({url,options});return response(url.endsWith('/auth/v1/user')?{id:owner,email_confirmed_at:'now'}:[{id:station,gateway_id:owner}])};
+  const r=res();await makeHandler('kits',{env,fetcher})(req('PATCH',{action:'station',id:station,name:'Cubeta',location:'Pruebas',bed_height:65,capacity_height:16,yellow_alert:12,red_alert:15,gateway_id:owner,expected_gateway:owner,serial:'AJENA'}),r);
+  assert.equal(r.code,200);assert.equal(calls.at(-1).options.headers.Authorization,'Bearer '+bearer);assert.equal(calls.at(-1).options.headers.apikey,env.SUPABASE_PUBLISHABLE_KEY);
+  const patch=JSON.parse(calls.at(-1).options.body);assert.equal(patch.gateway_id,owner);assert.equal(patch.serial,undefined);
 });
 test('credencial de gateway no sirve como sesión y petición inválida no llega a DB',async()=>{
   let count=0;const fetcher=async()=>{count++;return new Response('{}',{status:401})};

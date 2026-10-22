@@ -125,6 +125,10 @@ public sealed class HydroUsbReader : IDisposable {
  $taskNextProcessCheck=[DateTime]::MinValue
  $taskSaved=0
  while(-not $taskReader.Failed) {
+  $taskPauseFile=Join-Path $PSScriptRoot 'pausa-ui.txt'
+  if(Test-Path -LiteralPath $taskPauseFile) {
+   try {if([int64](Get-Content -LiteralPath $taskPauseFile -Raw) -gt [DateTimeOffset]::UtcNow.ToUnixTimeMilliseconds()){break}} catch {}
+  }
   if($ProcesoAppId -and [DateTime]::UtcNow -ge $taskNextProcessCheck) {
    if(-not (Get-Process -Id $ProcesoAppId -ErrorAction SilentlyContinue)) {Write-UsbLog 'App cerrada. Puerto liberado.';break}
    $taskNextProcessCheck=[DateTime]::UtcNow.AddSeconds(2)

@@ -1,0 +1,15 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {makeHandler,hash} from '../lib/server.js';
+const env={SUPABASE_URL:'https://testing.supabase.co',SUPABASE_PUBLISHABLE_KEY:'sb_publishable_TEST',SUPABASE_SECRET_KEY:'sb_secret_TEST'};
+const owner='00000000-0000-4000-8000-000000000011',gateway='00000000-0000-4000-8000-000000000021',station='00000000-0000-4000-8000-000000000031',ticket='00000000-0000-4000-8000-000000000041';
+async function request(body,fetcher){const result={setHeader(){},status(n){this.code=n;return this},json(data){this.data=data}};await makeHandler('kits',{env,fetcher})({method:'POST',headers:{authorization:'Bearer user_session_for_test_only_0001','content-type':'application/json'},body},result);return result}
+const json=data=>new Response(JSON.stringify(data));
+test('preparar Wi-Fi comprueba propietario y guarda sólo hash, sin invalidar la clave actual',async()=>{
+ const calls=[];const fetcher=async(url,options)=>{calls.push({url,options});if(url.endsWith('/auth/v1/user'))return json({id:owner,email_confirmed_at:'now'});if(url.includes('kit_gateways?'))return json([{id:gateway,kit_id:station}]);if(url.includes('kit_kits?')){assert(url.includes('owner_id=eq.'+owner));return json([{id:station}])}if(url.includes('kit_stations?'))return json([{id:station,serial:'EST-'+'A'.repeat(16),node_label:'RIO_02',setup_pending:false}]);if(url.includes('kit_gateway_pending?'))return json([{ticket}]);throw Error('Unexpected route')};
+ const r=await request({action:'gateway-prepare',id:gateway,hardware:'ESP32-AABBCCDDEEFF'},fetcher);assert.equal(r.code,200);assert.match(r.data.token,/^GW_[a-f0-9]{64}$/);const stage=JSON.parse(calls.at(-1).options.body);assert.equal(stage.token_hash,hash(r.data.token));assert.equal(stage.proof,hash(r.data.token+':'+r.data.nonce));assert(!JSON.stringify(stage).includes(r.data.token));assert(!calls.some(c=>c.url.includes('kit_gateway_keys')));assert(!JSON.stringify(r.data).includes(env.SUPABASE_SECRET_KEY));
+});
+test('un receptor ajeno no permite configurar ni pausar el lector local',async()=>{
+ for(const action of ['usb-lease','gateway-prepare','gateway-finish','usb-reading']){let count=0;const r=await request({action,id:gateway},async url=>{count++;if(url.endsWith('/auth/v1/user'))return json({id:owner,email_confirmed_at:'now'});return json([])});assert.equal(r.code,403);assert.equal(count,2)}
+});
+test('guardar un gateway pasa la selección explícita al cambio atómico con JWT del usuario',async()=>{
+ let call;const r=await request({action:'remember-gateway',id:gateway,expected:null,confirm:false,station_ids:[]},async(url,options)=>{if(url.endsWith('/auth/v1/user'))return json({id:owner,email_confirmed_at:'now'});call={url,options};return json(null)});assert.equal(r.code,200);assert(call.url.endsWith('rpc/kit_connect_gateway'));assert.deepEqual(JSON.parse(call.options.body),{p_gateway:gateway,p_expected:null,p_confirm:false,p_stations:[]});assert.equal(call.options.headers.apikey,env.SUPABASE_PUBLISHABLE_KEY);
+});

@@ -1,4 +1,4 @@
-HACKEANDO LAS INUNDACIONES - VERSION 0.2.2 PARA WINDOWS X64
+HACKEANDO LAS INUNDACIONES - VERSION 0.3.0 PARA WINDOWS X64
 
 Abre ABRIR-APP.cmd en la carpeta principal o ABRIR-ESTA-VERSION.cmd dentro de la version.
 Los lanzadores usan el disco de cada PC. En una PC nueva copian el programa una sola vez.
@@ -9,7 +9,7 @@ No necesitas instalar Node.js para esta aplicacion compilada.
 Esta es la version actual para pruebas. Las versiones anteriores se conservan por separado.
 En la laptop de desarrollo la conexion ya esta configurada en el perfil privado de Windows.
 En otra computadora sin conexion configurada puedes explorar la demo de kits.
-No incluye la clave privada de Supabase; no compartas esa clave con compradores.
+No incluye la clave privada de Supabase; no compartas esa clave con usuarios.
 
 En Mis estaciones veras primero tarjetas de resumen. Pulsa una para abrir su nivel,
 historial y configuracion. Usa Volver a mis estaciones para regresar conservando el filtro.
@@ -28,3 +28,10 @@ Los datos reales requieren Internet; no incluye el visualizador USB offline ante
 Los archivos de desarrollo estan en Codigo\EstacionHidrometrica dentro de la USB.
 Esta organizacion usa carpetas por version, sin ZIP.
 Si Windows impide abrirlo, no desactives sus protecciones; esa PC requiere revisar la firma.
+
+NOVEDADES 0.3.0
+Guia de configuracion para usuarios en el panel. Sin referencias a comprador.
+Mis gateways permite conectar por USB, recordar el receptor y configurar su Wi-Fi.
+Antes de sustituir un gateway guardado se solicita confirmacion y se eligen las estaciones.
+Internet comprobado aparece solo con una lectura directa posterior a la configuracion.
+El gateway compatible conserva el Wi-Fi y la vinculacion al cambiar de USB a corriente.

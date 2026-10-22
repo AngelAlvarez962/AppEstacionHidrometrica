@@ -27,3 +27,5 @@
 .detail-sensor b{font-size:13px;font-weight:400;color:var(--muted);margin-left:6px}
 .detail-sensor p{margin:5px 0;color:var(--muted);font-size:12px;line-height:1.5}
 @media(max-width:620px){.detail-sensor{align-items:flex-start;flex-direction:column;gap:8px}.detail-sensor strong{font-size:34px}}
+
+.guide-copy{font-size:1.05rem;line-height:1.7;color:#355767}.guide-progress{display:flex;gap:7px;margin:25px 0}.guide-progress span{height:5px;flex:1;border-radius:8px;background:#deebef}.guide-progress .active{background:#0086b0}.confirm-choice{display:flex;align-items:flex-start;gap:10px;line-height:1.5}.confirm-choice input{width:auto;margin-top:5px}.gateway-mode{color:#087888;font-size:.9rem}.section-toolbar .toolbar-actions{flex-wrap:wrap}#usb-status{overflow-wrap:anywhere}
