@@ -1,0 +1,12 @@
+node_modules
+.git
+.vercel
+.env*
+!.env.example
+desktop
+firmware
+docs
+tests
+aplicacion-pc
+fichas-privadas
+*.log

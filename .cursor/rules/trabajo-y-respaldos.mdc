@@ -1,0 +1,6 @@
+---
+description: Trabajar desde la laptop y respaldar avances en escritorio y USB
+alwaysApply: true
+---
+
+Trabajar en la copia principal de la laptop descrita en AGENTS.md. Al terminar una jornada o entregar avances, ejecutar Guardar-Avances.ps1 desde la raíz de la copia principal para respaldar en el escritorio y la USB. Informar si falta la USB. No copiar secretos, sesiones o perfiles privados. No programar automatizaciones por esta regla.

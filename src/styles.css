@@ -29,3 +29,5 @@
 @media(max-width:620px){.detail-sensor{align-items:flex-start;flex-direction:column;gap:8px}.detail-sensor strong{font-size:34px}}
 
 .guide-copy{font-size:1.05rem;line-height:1.7;color:#355767}.guide-progress{display:flex;gap:7px;margin:25px 0}.guide-progress span{height:5px;flex:1;border-radius:8px;background:#deebef}.guide-progress .active{background:#0086b0}.confirm-choice{display:flex;align-items:flex-start;gap:10px;line-height:1.5}.confirm-choice input{width:auto;margin-top:5px}.gateway-mode{color:#087888;font-size:.9rem}.section-toolbar .toolbar-actions{flex-wrap:wrap}#usb-status{overflow-wrap:anywhere}
+
+.company-brand{background:#fff;border:1px solid var(--line);border-radius:12px;width:fit-content;overflow:hidden}.company-brand img{display:block;max-width:100%;height:auto;object-fit:contain}.company-brand-auth{margin-top:25px}.company-brand-panel{margin:20px 0 12px}.company-brand-panel img{width:150px}@media(max-width:850px){.sidebar-bottom .company-brand-panel{display:none}}@media(max-width:620px){.company-brand-auth{margin-top:18px}.company-brand-auth img{width:185px}}
