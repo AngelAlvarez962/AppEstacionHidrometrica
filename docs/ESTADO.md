@@ -1,3 +1,7 @@
+# Actualización 0.3.1 — 22/10/2026
+
+Correos de confirmación y recuperación con página pública HTTPS, utilizables desde otro dispositivo. Ver PRUEBAS-VERSION-0.3.1.md.
+
 # Estado del proyecto — 22 de octubre de 2026
 
 Versión 0.3.0. Fuente en la USB: `Codigo/EstacionHidrometrica`. Aplicación Windows en `Aplicaciones/v0.3.0/Programa` y copia rápida local `App-PC`. Las versiones anteriores se conservan. No se publicó GitHub/Vercel ni se modificó la primera página web.

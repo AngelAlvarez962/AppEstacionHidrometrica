@@ -1,5 +1,6 @@
 import {installGatewayUI} from './gateway-ui.js';
 import {internetConfirmed} from './gateway.js';
+import {createEmailRequester} from './email-access.js';
 import {createClient} from '@supabase/supabase-js';
 import {calibration,measurement,sensorDistance,text,validCode} from './core.js';
 import {DemoStore} from './demo.js';
@@ -13,6 +14,7 @@ const number=value=>Number(value.toFixed(1)).toLocaleString('es-MX');
 const clock=value=>new Date(value).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 let supabase=null,session=null,demo=null,mode='login',view='stations',selected=null,snapshot={stations:[],gateways:[],readings:[],kits:[],admin:false},generation=0,loading=false,authBusy=false,toastTimer,syncFailed=false;
 let setupLocked=false;
+let emailRequester=null;
 let stationDetailOpen=false,overviewScroll=0;
 const recovery=new RecoveryFlow(location.search);
 function showToast(message){$('toast').textContent=message;$('toast').hidden=false;clearTimeout(toastTimer);toastTimer=setTimeout(()=>$('toast').hidden=true,4500)}
@@ -117,20 +119,20 @@ const gatewayUI=installGatewayUI({$,escape,api,openModal,bindModal,reload,showTo
 const groups=installEntities({$,escape,openModal,bindModal,api,reload,showToast,switchView,render,getSnapshot:()=>snapshot,getDemo:()=>demo,getUser:()=>demo?demo.user:session?.user,getSelected:()=>selected});
 $('back-stations').onclick=backToStations;
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>setAuthMode(b.dataset.mode));document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>switchView(b.dataset.view));
-$('forgot').onclick=()=>{if(navigator.userAgent.includes('Electron/')){message('auth-status','Para recuperar tu contraseña, abre Monitoreo → Abrir versión para navegador y solicita el correo desde allí.');return}setAuthMode(mode==='reset'?'login':'reset')};$('modal-close').onclick=()=>{if(!setupLocked)$('modal').close()};$('modal').addEventListener('cancel',event=>{if(setupLocked)event.preventDefault()});$('modal').addEventListener('close',()=>{queueMicrotask(ensureSetup)});$('claim-open').onclick=()=>openClaim();$('edit-station').onclick=()=>openStation();$('create-open').onclick=openCreate;$('csv').onclick=exportCsv;$('refresh').onclick=reload;
+$('forgot').onclick=()=>setAuthMode(mode==='reset'?'login':'reset');$('modal-close').onclick=()=>{if(!setupLocked)$('modal').close()};$('modal').addEventListener('cancel',event=>{if(setupLocked)event.preventDefault()});$('modal').addEventListener('close',()=>{queueMicrotask(ensureSetup)});$('claim-open').onclick=()=>openClaim();$('edit-station').onclick=()=>openStation();$('create-open').onclick=openCreate;$('csv').onclick=exportCsv;$('refresh').onclick=reload;
 $('email-settings').onclick=()=>{setupLocked=false;const profile=snapshot.profiles?.find(p=>p.user_id===(demo?demo.user:session.user).id);openModal('Avisos por correo',`<p class="modal-copy">Los avisos van al correo confirmado de tu cuenta al entrar en amarillo, rojo o error de sensor. Se evita enviar un correo por cada lectura.${snapshot.emailConfigured?'':' El envío está pendiente de configurar el proveedor; por ahora no se mandan correos.'}</p><form><label>Correos de atención<select name="enabled"><option value="false">Desactivados</option><option value="true" ${profile?.email_alerts_enabled?'selected':''}>Activados</option></select></label><p class="modal-copy">Para enviar correos se necesita internet y el servidor de monitoreo en funcionamiento. El aviso de desconexión todavía no genera correos.</p><div class="modal-actions"><button class="primary" type="submit">Guardar preferencia</button></div></form>`);bindModal(async fields=>{const enabled=fields.get('enabled')==='true';if(!demo)await api('PATCH',{action:'email-preference',enabled});$('modal').close();await reload();showToast(demo?'Preferencia de ejemplo; no envía correos.':'Preferencia guardada.')})};
 $('demo-start').onclick=()=>{demo=new DemoStore();generation++;loading=false;selected=null;stationDetailOpen=false;view='stations';showApp();void reload()};
 $('demo-account').onchange=()=>{demo.account=$('demo-account').value;generation++;loading=false;selected=null;stationDetailOpen=false;groups.resetFilters();snapshot=demo.snapshot();view='stations';showApp();void reload()};
 $('signout').onclick=async()=>{await gatewayUI.close();generation++;loading=false;if(demo){demo=null;session=null;showAuth();return}try{const {error}=await supabase.auth.signOut({scope:'local'});if(error)throw error;session=null;showAuth()}catch(_){showToast('No se pudo cerrar la sesión. Inténtalo de nuevo.')}};
 $('auth-form').onsubmit=async event=>{event.preventDefault();if(authBusy||!supabase)return;const form=event.currentTarget;authBusy=true;$('auth-submit').disabled=true;message('auth-status','');const fields=new FormData(form),email=String(fields.get('email')||'').trim(),password=String(fields.get('password')||'');
   try{let result;
-    if(mode==='signup')result=await supabase.auth.signUp({email,password,options:{data:{display_name:text(fields.get('name'),80)},emailRedirectTo:location.origin+'/'}});
-    else if(mode==='reset')result=await supabase.auth.resetPasswordForEmail(email,{redirectTo:location.origin+'/?recovery=1'});
+    if(mode==='signup')result=await (emailRequester?.client||supabase).auth.signUp({email,password,options:{data:{display_name:text(fields.get('name'),80)},emailRedirectTo:emailRequester?.redirect||location.origin+'/'}});
+    else if(mode==='reset')result=await (emailRequester?.client||supabase).auth.resetPasswordForEmail(email,{redirectTo:emailRequester?.redirect||location.origin+'/?recovery=1'});
     else if(mode==='update')result=await supabase.auth.updateUser({password});
     else result=await supabase.auth.signInWithPassword({email,password});
     if(result.error)throw result.error;
-    if(mode==='signup'){form.reset();message('auth-status','Revisa tu correo para confirmar la cuenta. Después podrás activar tu kit.');}
-    else if(mode==='reset')message('auth-status','Si existe una cuenta con ese correo, recibirás un enlace para recuperar el acceso.');
+    if(mode==='signup'){form.reset();message('auth-status',emailRequester?'Revisa tu correo. Puedes confirmarlo desde tu celular; después inicia sesión aquí.':'Revisa tu correo para confirmar la cuenta. Después podrás activar tu kit.');}
+    else if(mode==='reset')message('auth-status',emailRequester?'Si existe una cuenta con ese correo, recibirás un enlace que puedes abrir desde tu celular o computadora para elegir una nueva contraseña.':'Si existe una cuenta con ese correo, recibirás un enlace para recuperar el acceso.');
     else if(mode==='update'){recovery.complete();history.replaceState(null,'',location.pathname);session=result.data?.user?{...session,user:result.data.user}:session;showApp();await reload();showToast('Contraseña actualizada.');}
   }catch(error){const messages={invalid_credentials:'Correo o contraseña incorrectos.',email_not_confirmed:'Confirma tu correo antes de entrar.',over_email_send_rate_limit:'Espera unos minutos antes de solicitar otro correo.',weak_password:'Elige una contraseña más fuerte.',user_already_exists:'Revisa tu correo o entra con tu cuenta existente.'};message('auth-status',messages[error.code]||'No se pudo completar el acceso. Revisa los datos y la conexión e inténtalo de nuevo.',true)}finally{authBusy=false;$('auth-submit').disabled=false}
 };
@@ -143,6 +145,7 @@ async function start(){
     const storage=authStorage(sessionStorage,localStorage);
     // Unique channel per page prevents another tab's SIGNED_IN event replacing this account.
     supabase=createClient(config.url,config.key,{auth:{storage,storageKey:'hi-kits-auth-'+crypto.randomUUID(),flowType:'pkce',persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}});
+    emailRequester=createEmailRequester(createClient,config);
     supabase.auth.onAuthStateChange((event,next)=>{
       session=next;if(demo)return;
       const recoveryStep=recovery.event(event,next);

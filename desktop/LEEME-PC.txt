@@ -1,4 +1,4 @@
-HACKEANDO LAS INUNDACIONES - VERSION 0.3.0 PARA WINDOWS X64
+HACKEANDO LAS INUNDACIONES - VERSION 0.3.1 PARA WINDOWS X64
 
 Abre ABRIR-APP.cmd en la carpeta principal o ABRIR-ESTA-VERSION.cmd dentro de la version.
 Los lanzadores usan el disco de cada PC. En una PC nueva copian el programa una sola vez.
@@ -29,9 +29,13 @@ Los archivos de desarrollo estan en Codigo\EstacionHidrometrica dentro de la USB
 Esta organizacion usa carpetas por version, sin ZIP.
 Si Windows impide abrirlo, no desactives sus protecciones; esa PC requiere revisar la firma.
 
-NOVEDADES 0.3.0
+NOVEDADES 0.3.1
 Guia de configuracion para usuarios en el panel. Sin referencias a comprador.
 Mis gateways permite conectar por USB, recordar el receptor y configurar su Wi-Fi.
 Antes de sustituir un gateway guardado se solicita confirmacion y se eligen las estaciones.
 Internet comprobado aparece solo con una lectura directa posterior a la configuracion.
 El gateway compatible conserva el Wi-Fi y la vinculacion al cambiar de USB a corriente.
+
+CORREOS EN CELULAR: Confirmacion y recuperacion abren el portal publico de acceso.
+Usa un correo nuevo solicitado desde esta version. Los enlaces anteriores no se modifican.
+La confirmacion sigue siendo obligatoria. Al terminar vuelve a entrar en la app.

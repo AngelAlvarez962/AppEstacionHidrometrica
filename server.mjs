@@ -7,7 +7,7 @@ import {loadEnvFile} from 'node:process';
 import {makeHandler,processEmailQueue} from './lib/server.js';
 const production=process.argv.includes('--production');
 const root=fileURLToPath(new URL('.',import.meta.url)),dist=resolve(root,'dist');
-try{const config=JSON.parse(await readFile(resolve(root,'config/public.json'),'utf8'));process.env.SUPABASE_URL ||= config.url;if(config.key)process.env.SUPABASE_PUBLISHABLE_KEY ||= config.key;}catch(_){/* Vercel uses its environment variables. */}
+try{const config=JSON.parse(await readFile(resolve(root,'config/public.json'),'utf8'));process.env.SUPABASE_URL ||= config.url;if(config.key)process.env.SUPABASE_PUBLISHABLE_KEY ||= config.key;if(config.authPortalUrl)process.env.AUTH_PORTAL_URL ||= config.authPortalUrl;}catch(_){/* Vercel uses its environment variables. */}
 // npm and the USB launchers use the same private profile on each Windows PC.
 if(process.platform==='win32'&&!process.env.SUPABASE_SECRET_KEY&&process.env.LOCALAPPDATA){
   const ref=/^https:\/\/([a-z]{20})\.supabase\.co\/?$/.exec(process.env.SUPABASE_URL||'')?.[1];

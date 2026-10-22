@@ -1,6 +1,6 @@
 {
   "name": "hackeando-inundaciones-kits",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "private": true,
   "type": "module",
   "engines": {
@@ -11,7 +11,7 @@
     "build": "vite build",
     "build:pc": "powershell.exe -NoLogo -NoProfile -ExecutionPolicy Bypass -File desktop/build.ps1",
     "preview": "node --env-file-if-exists=.env.local server.mjs --production",
-    "test": "node tests/core.test.mjs && node tests/api.test.mjs && node tests/security-db.test.mjs && node tests/desktop.test.mjs && node tests/desktop-launcher.test.mjs && node tests/flexible-db.test.mjs && node tests/onboarding.test.mjs && node tests/usb-bridge.test.mjs && node tests/auth-recovery.test.mjs && node tests/gateway-connection.test.mjs && node tests/gateway-api.test.mjs"
+    "test": "node tests/core.test.mjs && node tests/api.test.mjs && node tests/security-db.test.mjs && node tests/desktop.test.mjs && node tests/desktop-launcher.test.mjs && node tests/flexible-db.test.mjs && node tests/onboarding.test.mjs && node tests/usb-bridge.test.mjs && node tests/auth-recovery.test.mjs && node tests/gateway-connection.test.mjs && node tests/gateway-api.test.mjs && node tests/email-access.test.mjs"
   },
   "dependencies": {
     "@supabase/supabase-js": "2.117.3"
