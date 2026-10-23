@@ -1,0 +1,25 @@
+ESTACIÓN TACOTALPA - CÓDIGO COMENTADO
+
+Abre Estacion_Tacotalpa.ino con Arduino IDE.
+Placa: Heltec WiFi LoRa 32 V2 (paquete esp32 de Espressif Systems).
+No seleccionar Arduino Uno ni Heltec V3.
+
+Bibliotecas del gestor de Arduino IDE:
+- LoRa, de Sandeep Mistry.
+- Adafruit GFX Library, de Adafruit.
+- Adafruit SSD1306, de Adafruit.
+- Adafruit BusIO, de Adafruit (dependencia).
+SPI y Wire se incluyen con el paquete de la placa.
+
+Se conservaron los comentarios de entrega y el programa anterior, ajustando
+el identificador a RIO_02 y ECHO a GPIO23 para tu instalación actual.
+TRIG: GPIO13. La app muestra Tacotalpa mediante la asociación existente.
+Busca [AJUSTE HABITUAL] para los ajustes explicados; conserva comillas,
+puntos decimales y punto y coma. No modificar los bloques [CONSERVAR].
+Los cambios de ID o radio requieren coordinar gateway y app.
+La altura de instalación y umbrales se configuran en el receptor/app.
+
+ANTES DE ENCENDER: revisar alimentación y proteger ECHO si entrega 5V.
+Divisor: ECHO -> 2.2 kOhm -> unión al GPIO23; desde esa unión,
+resistencia 3.3 kOhm a GND común. No es una reparación garantizada del fallo.
+Este archivo no se ha cargado en la placa durante esta entrega.

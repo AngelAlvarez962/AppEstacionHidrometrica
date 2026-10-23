@@ -13,3 +13,5 @@ Supabase njwxrnhfxjbtsxemrmol, migraciones 001–007 aplicadas, RLS y separació
 Pendientes: registro libre de estaciones de terceros; visualizador sin Internet; proveedor y ejecución programada de avisos por correo; pruebas del kit instalado en río. No anunciar estos pendientes como funciones disponibles. El estado histórico se conserva en ESTADO-ANTERIOR-0.3.1.md.
 
 23/10/2026: el dominio estacionhidrometrica.ideasdisruptivas.com aparece como alias de producción del mismo proyecto de Vercel. Se mueve el logo de Ideas Disruptivas al encabezado de acceso, junto al nombre del proyecto; se conserva el logo del panel. Cambio visual de navegador sin modificar cuentas, firmware, DNS ni autenticación. La app Windows abre la web y recibe esta presentación automáticamente. USB no conectada al revisar; sincronización pendiente hasta conectarla.
+
+23/10/2026: se entrega firmware/Estacion_Tacotalpa con los comentarios del kit, NODE_ID RIO_02 y TRIG13/ECHO23 según el cableado confirmado. No se carga en hardware. El sensor continúa sin eco y la protección eléctrica ECHO está pendiente. La limpieza solicitada fue bloqueada por la revisión automática; no se borraron archivos.
