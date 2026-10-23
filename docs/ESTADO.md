@@ -1,4 +1,4 @@
-# Estado — 22 de octubre de 2026
+# Estado — 23 de octubre de 2026
 
 Versión 0.3.2. La aplicación principal se publicó en https://app-estacion-hidrometrica.vercel.app/ con el logo de Ideas Disruptivas. Vercel sirve la interfaz y las API `/api/config`, `/api/kits`, `/api/device`; Supabase mantiene las cuentas y las mediciones existentes. El acceso público a la pantalla de entrada no permite leer datos sin sesión. Configuración privada almacenada como secretos de servidor en Vercel, sin exponer la clave privada en el cliente.
 
@@ -11,3 +11,5 @@ La primera página web y sus proyectos Vercel no se modificaron. Confirmación y
 Supabase njwxrnhfxjbtsxemrmol, migraciones 001–007 aplicadas, RLS y separación de cuentas activos. Gateway físico Heltec V2, estación RIO_02 mostrada como Tacotalpa. Continúa la calibración de práctica: sensor-fondo 62.3 cm, capacidad 16 cm y avisos 12/15 cm. La distancia directa es independiente del nivel calculado. Antes de instalar en río guardar las medidas reales.
 
 Pendientes: registro libre de estaciones de terceros; visualizador sin Internet; proveedor y ejecución programada de avisos por correo; pruebas del kit instalado en río. No anunciar estos pendientes como funciones disponibles. El estado histórico se conserva en ESTADO-ANTERIOR-0.3.1.md.
+
+23/10/2026: el dominio estacionhidrometrica.ideasdisruptivas.com aparece como alias de producción del mismo proyecto de Vercel. Se mueve el logo de Ideas Disruptivas al encabezado de acceso, junto al nombre del proyecto; se conserva el logo del panel. Cambio visual de navegador sin modificar cuentas, firmware, DNS ni autenticación. La app Windows abre la web y recibe esta presentación automáticamente. USB no conectada al revisar; sincronización pendiente hasta conectarla.
