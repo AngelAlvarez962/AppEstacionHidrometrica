@@ -22,6 +22,6 @@ La altura de instalación y umbrales se configuran en el receptor/app.
 ANTES DE ENCENDER: revisar alimentación y proteger ECHO si entrega 5V.
 Divisor: ECHO -> 2.2 kOhm -> unión al GPIO23; desde esa unión,
 resistencia 3.3 kOhm a GND común. No es una reparación garantizada del fallo.
-Este archivo no se ha cargado en la placa durante esta entrega.
+Actualización: cargado el 23/10/2026 por solicitud del usuario; escritura verificada.
 Verificación 23/10/2026: compilación correcta para Heltec V2 con esp32 3.3.12.
-Uso: 312951 bytes de programa y 23852 bytes de RAM. No cargado en hardware.
+Uso: 312951 bytes de programa y 23852 bytes de RAM. Cargado en la estación RIO_02; continúa SIN_ECO después del reinicio.
