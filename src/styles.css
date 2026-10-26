@@ -39,3 +39,5 @@
 @media(max-width:620px){#modal:has(>.setup-tour){padding:18px}#modal:has(>.setup-tour) .modal-heading h2{font-size:18px}#modal>.setup-tour{padding:12px}#modal>.setup-tour h2{font-size:16px;margin:6px 0}#modal>.setup-tour p{font-size:12px;line-height:1.5;margin-bottom:10px}#modal>.setup-tour .primary,#modal>.setup-tour .secondary{padding:9px 12px}}
 /* Show the original wordmark without the slogan, without altering the source asset. */
 .company-brand{position:relative;width:150px;aspect-ratio:690/450;clip-path:polygon(0 0,100% 0,100% 94%,73% 94%,73% 100%,0 100%)}.company-brand img{position:absolute;width:199.42%;max-width:none;height:auto;left:-26.08%;top:-31.11%}
+
+.topbar-account{display:flex;align-items:center;justify-content:flex-end;gap:20px;flex-wrap:wrap}.company-brand-header{width:85px;flex:0 0 85px;margin:0}.topbar-account .user-pill{max-width:230px}@media(max-width:620px){.topbar-account{gap:10px}.company-brand-header{width:65px;flex-basis:65px}.topbar-account .user-pill{max-width:120px}.topbar{flex-wrap:wrap}}
