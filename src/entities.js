@@ -30,5 +30,5 @@ export function installEntities(ctx){
   const removed=data().archivedStations||[];$('removed-stations').hidden=!removed.length;$('removed-list').innerHTML=removed.map(s=>`<div class="removed-row"><div><strong>${escape(s.name)}</strong><span>${data().admin?escape(ownerName(s)):escape(s.serial)}</span></div><button class="secondary" data-restore="${escape(s.id)}">Restaurar estación</button></div>`).join('');$('removed-list').querySelectorAll('[data-restore]').forEach(b=>b.onclick=()=>restoreStation(b.dataset.restore));$('classify-station').hidden=!data().admin;
  }
  $('entity-filter').onchange=()=>{entityFilter=$('entity-filter').value;ctx.render()};$('owner-filter').onchange=()=>{ownerFilter=$('owner-filter').value;ctx.render()};$('entity-create').onclick=()=>entityForm();$('remove-station').onclick=removeStation;$('classify-station').onclick=classify;
- return {render,visibleStations,ownerName,entityLabel,personalOptions,resetFilters(){entityFilter='all';ownerFilter='all'}};
+ return {entityForm,render,visibleStations,ownerName,entityLabel,personalOptions,resetFilters(){entityFilter='all';ownerFilter='all'}};
 }

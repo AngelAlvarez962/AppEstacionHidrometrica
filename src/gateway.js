@@ -12,14 +12,6 @@ export function internetConfirmed(gateway,now=Date.now()){
  const last=Date.parse(gateway.internet_last_seen),configured=Date.parse(gateway.internet_configured_at)||0;
  return Number.isFinite(last)&&last>=configured&&now-last>=-5000&&now-last<90000;
 }
-export const setupSteps=[
- {title:'Entra y agrega tus equipos',text:'Inicia sesión con tu correo confirmado. Si tu estación ya aparece, continúa. Si todavía no aparece, usa Agregar equipos y el código de activación entregado con el kit.'},
- {title:'Configura la estación',text:'Abre tu estación y pulsa Configurar estación. Elige su gateway, un nombre y las medidas reales de la instalación. Sensor a fondo es la distancia desde la cara del sensor hasta el punto que representa cero de agua.'},
- {title:'Conecta el gateway por USB',text:'En Mis gateways pulsa Conectar por USB. Usa un cable que transmita datos, selecciona el puerto del gateway e indica cuál de tus receptores conectaste. La cuenta recordará tu elección; si había otro, te pedirá confirmación antes de cambiarlo.'},
- {title:'Prepara el funcionamiento por Internet',text:'Con el USB conectado, pulsa Configurar Wi-Fi e introduce una red de 2.4 GHz con Internet. Este paso requiere el firmware compatible del gateway. La app guarda la vinculación y el gateway guarda la red; la contraseña no se guarda en tu navegador ni en la cuenta.'},
- {title:'Comprueba y cambia a corriente',text:'Espera a que aparezca Internet comprobado, desconecta el USB de la computadora y alimenta el gateway con su cargador. Con la estación encendida y el mismo Wi-Fi disponible, verifica que la hora de la última lectura siga avanzando. Guardar el equipo por sí solo no le da acceso a Internet.'},
- {title:'Consulta las medidas',text:'En Mis estaciones verás la distancia del sensor y el nivel de agua calculado por separado. Abre el detalle para consultar el historial o exportarlo. Si no llegan datos, revisa corriente, estación encendida, alcance LoRa y conexión del gateway. Una lectura antigua no significa que el nivel siga igual.'}
-];
 
 export class GatewaySerial {
  constructor({serial=navigator.serial,onLine=()=>{},onClose=()=>{}}={}){this.serial=serial;this.onLine=onLine;this.onClose=onClose;this.port=null;this.reader=null;this.done=null;this.pending='';}

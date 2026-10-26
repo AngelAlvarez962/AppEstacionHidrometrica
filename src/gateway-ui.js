@@ -1,4 +1,4 @@
-import {GatewaySerial,setupSteps,gatewayChange} from './gateway.js';
+import {GatewaySerial,gatewayChange} from './gateway.js';
 import {displayId} from './onboarding.js';
 export function installGatewayUI(ctx){
  const {$,escape,api,openModal,bindModal,reload,showToast}=ctx;
@@ -9,8 +9,7 @@ export function installGatewayUI(ctx){
  function status(text,error=false){if($('usb-status')){$('usb-status').textContent=text;$('usb-status').classList.toggle('error',error)}}
  function controls(){if($('usb-remember'))$('usb-remember').disabled=!recognized||remembered;if($('usb-wifi'))$('usb-wifi').disabled=!remembered||!hello;}
  async function close(){clearInterval(lease);lease=null;remembered=false;recognized=false;hello=null;pending=null;const old=usb;usb=null;await old?.close();if(selected&&!demo())await api('POST',{action:'usb-lease',id:selected,release:true}).catch(()=>{});selected=null;controls();}
- function guide(){step=Math.max(0,Math.min(step,setupSteps.length-1));const content=setupSteps[step];openModal('Guía para empezar',`<p class="eyebrow">PASO ${step+1} DE ${setupSteps.length}</p><h3>${escape(content.title)}</h3><p class="guide-copy">${escape(content.text)}</p><div class="guide-progress" aria-label="Paso ${step+1} de ${setupSteps.length}">${setupSteps.map((s,i)=>`<span class="${i===step?'active':''}"></span>`).join('')}</div><div class="modal-actions"><button class="secondary" id="guide-prev" ${step?'':'disabled'}>Anterior</button><button class="primary" id="guide-next">${step===setupSteps.length-1?'Terminar guía':'Siguiente'}</button><button class="text-button" id="guide-later">Ver después</button></div>`);$('guide-prev').onclick=()=>{step--;guide()};$('guide-next').onclick=async()=>{if(step<setupSteps.length-1){step++;guide();return}try{if(demo())demo().guideCompleted=true;else await api('PATCH',{action:'guide',completed:true});$('modal').close();await reload();}catch{showToast('No se pudo guardar el avance. Puedes consultar la guía otra vez.')}};$('guide-later').onclick=()=>$('modal').close();}
- function openGuide(){guideShown=true;step=0;guide()}
+ function openGuide(){guideShown=true;ctx.startGuide()}
  async function remember(){const g=ownGateways().find(g=>g.id===selected);if(!g)return;const previous=profile()?.preferred_gateway_id||null;const changed=gatewayChange(previous,g.id);if(changed&&!$('usb-confirm')?.checked)throw Error('Confirma el cambio o conserva tu gateway anterior.');if(demo())demo().preferredGateway=g.id;else await api('POST',{action:'remember-gateway',id:g.id,expected:previous,confirm:changed,station_ids:Array.from(document.querySelectorAll('[name=move_station]:checked')).map(input=>input.value)});remembered=true;await reload();status('Gateway guardado en tu cuenta. Puedes configurar su Wi-Fi.');controls();}
  async function line(value){
   if(!usb||account!==user()?.id)return;
@@ -41,7 +40,7 @@ export function installGatewayUI(ctx){
   bindModal(async fields=>{if(!usb||!hello)throw Error('Vuelve a conectar el gateway.');if(pending)throw Error('Espera la confirmación del gateway antes de volver a guardar.');const ssid=String(fields.get('ssid')),password=String(fields.get('password'));if(new TextEncoder().encode(ssid).length>32)throw Error('El nombre de red supera los 32 bytes.');const configuration=await api('POST',{action:'gateway-prepare',id:selected,hardware:hello.hardware});pending={ticket:configuration.ticket};await usb.send({cmd:'configure',ssid,password,...configuration});$('modal-content').querySelector('form').reset();hello.configured=true;status('Esperando confirmación del gateway. No retires el USB todavía.');setTimeout(()=>{if(pending?.ticket===configuration.ticket){pending=null;status('El gateway no confirmó el guardado. Vuelve a conectar el USB y repite el paso.',true)}},15000);});
  }
  function render(){if(account!==user()?.id){void close();account=user()?.id;guideShown=false;}const el=$('guide-open');if(el)el.hidden=!!data().admin;const usbButton=$('connect-usb');if(usbButton)usbButton.hidden=!!data().admin&&!ownGateways().length;}
- function suggestGuide(){if(!data().admin&&!profile()?.guide_completed&&!demo()?.guideCompleted&&!guideShown&&!$('modal').open){guideShown=true;guide();return true}return false}
+ function suggestGuide(){if(!data().admin&&!profile()?.guide_completed&&!demo()?.guideCompleted&&!guideShown&&!$('modal').open){guideShown=true;ctx.startGuide();return true}return false}
  $('guide-open').onclick=openGuide;$('connect-usb').onclick=openUSB;
  return {render,suggestGuide,close,openUSB};
 }
