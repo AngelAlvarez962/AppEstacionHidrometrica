@@ -43,3 +43,6 @@
 .topbar-account{display:flex;align-items:center;justify-content:flex-end;gap:20px;flex-wrap:wrap}.company-brand-header{width:85px;flex:0 0 85px;margin:0}.topbar-account .user-pill{max-width:230px}@media(max-width:620px){.topbar-account{gap:10px}.company-brand-header{width:65px;flex-basis:65px}.topbar-account .user-pill{max-width:120px}.topbar{flex-wrap:wrap}}
 
 .company-credit{display:block;margin-top:14px;text-align:right;font-size:11px;font-weight:500;line-height:1.5;color:var(--muted)}
+
+/* Integrate the original logo's white canvas with the sign-in background. */
+.company-brand-auth{mix-blend-mode:multiply}
