@@ -21,3 +21,5 @@ Pendientes: registro libre de estaciones de terceros; visualizador sin Internet;
 26/10/2026: interfaz y guía por secciones actualizadas; ver INTERFAZ-2026-10-26.md. Portal de correo publicado con enlace de regreso al dominio principal y textos de acceso neutros. Nombre visible de estación: Estación 1, conservando RIO_02 e historial. Suite de aplicación, compilación y seis pruebas del portal correctas. No se cambia firmware.
 
 26/10/2026: ajuste posterior: tutorial con formulario de ejemplo aun sin estaciones; prueba completa con cero equipos sin crear datos. Logo del panel trasladado al encabezado junto a la cuenta. No cambia el flujo habitual de configuración.
+
+26/10/2026: por ajuste posterior del usuario, se retira el logo gráfico del encabezado del panel y se conserva la mención discreta Una aplicación de Ideas Disruptivas en su pie. El logo del acceso y su archivo original se conservan.
