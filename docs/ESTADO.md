@@ -31,3 +31,5 @@ Pendientes: registro libre de estaciones de terceros; visualizador sin Internet;
 27/10/2026: botones y tarjetas interactivas con transiciones de color, contraste y elevación suave al pasar el mouse. Paletas clara y oscura, foco de teclado visible, acciones destructivas en rojo, controles deshabilitados sin animación y respeto a movimiento reducido. Cambio sólo visual.
 
 27/10/2026: corregido el contraste oscuro de los bloques de conexión de gateway, entidades internas, preparación de kits e inventario. También se cubren códigos de preparación, equipos retirados y etiquetas del nivel de agua para evitar fondos claros con texto claro.
+
+27/10/2026: acceso compacto adaptado a la altura de pantalla, revisado en 1280x720 y 1100x600 sin recortar controles; registro y acceso mantienen todos sus campos. Selector de tema estable en la página, sin trasladarlo a los formularios. Menú lateral retráctil con animación, iconos, preferencia local y respeto a movimiento reducido. La guía expande el menú al abrirla desde Ayuda. Revisadas navegación y persistencia; suite y compilación correctas.

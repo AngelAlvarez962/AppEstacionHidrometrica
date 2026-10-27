@@ -54,3 +54,59 @@
 :root{--sidebar-width:230px}.main{width:min(2200px,calc(100% - var(--sidebar-width)));max-width:2200px;margin-left:calc(var(--sidebar-width) + max(0px,(100vw - var(--sidebar-width) - 2200px)/2));margin-right:auto}.auth-view{width:100%;max-width:1680px;margin-inline:auto}
 @media(min-width:1900px){.main{padding:40px 48px}.station-grid,.gateway-grid{grid-template-columns:repeat(auto-fit,minmax(300px,1fr))}.entity-grid{grid-template-columns:repeat(auto-fit,minmax(280px,1fr))}.auth-story{padding:48px 64px}.auth-panel{padding:48px 64px}}
 @media(max-width:1200px){:root{--sidebar-width:200px}}@media(max-width:850px){:root{--sidebar-width:0px}}
+/* Fit the access screen by reducing spacing instead of clipping its content. */
+#auth-status:empty{display:none}
+@media(min-width:900px){
+ .auth-view{min-height:100dvh;grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
+ .auth-story,.auth-panel{padding:clamp(20px,4dvh,40px) clamp(24px,4vw,64px);min-width:0}
+ .story-content{padding:clamp(18px,4dvh,45px) 0 16px}
+ .company-brand-auth{width:110px;flex-basis:110px}
+ .auth-box{max-width:365px}
+}
+@media(min-width:900px) and (max-height:850px){
+ .auth-story,.auth-panel{padding-top:20px;padding-bottom:20px}
+ .company-brand-auth{width:84px;flex-basis:84px}
+ .auth-brand-row{gap:12px}.auth-brand-row>.brand{flex-basis:170px}
+ .auth-brand-row .brand strong{font-size:15px}.auth-brand-row .brand span{font-size:8px}
+ .story-content{padding:18px 0 10px}
+ .story-content h1{font-size:clamp(30px,3.4vw,44px);margin:12px 0 16px}
+ .story-content>p{font-size:13px;line-height:1.6}
+ .story-visual{padding:12px 0 0}.visual-screen{padding:18px}.wave{height:55px;margin:12px 0}.visual-chip{padding:9px;margin-top:8px}
+ .story-footer{margin:8px 0 0}
+ .auth-box h2{font-size:27px;margin:8px 0}.auth-box>p{margin:8px 0;line-height:1.5}
+ .auth-tabs{margin:16px 0}.auth-tabs button{padding:10px 7px}
+ #auth-form label{margin-bottom:12px}#auth-form input{padding:10px;margin-top:5px}
+ .auth-box .text-button{margin:12px auto}.demo-entry{margin-top:14px;padding-top:12px}.demo-entry button{margin:8px 0}
+}
+@media(min-width:900px) and (max-height:650px){
+ .auth-story,.auth-panel{padding-top:16px;padding-bottom:16px}
+ .auth-box h2{font-size:25px}.auth-tabs{margin:12px 0}.auth-box>p{font-size:12px}
+ .story-content h1{font-size:34px}.visual-screen{padding:12px}.wave{height:40px;margin:9px 0}
+}
+/* The menu keeps the same navigation targets when folded into an icon rail. */
+.sidebar{width:var(--sidebar-width);transition:width .24s ease,padding .24s ease,background-color .25s ease}
+.main{transition:width .24s ease,margin-left .24s ease}
+.sidebar-toggle{position:absolute;top:8px;right:8px;display:grid;place-items:center;width:28px;height:28px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--blue)}
+.sidebar-toggle span{font-size:24px;line-height:1;transition:transform .24s ease}
+.sidebar-collapsed .sidebar-toggle span{transform:rotate(180deg)}
+.sidebar-toggle:hover{background:var(--action-hover-bg)}
+@media(min-width:851px){
+ :root.sidebar-collapsed{--sidebar-width:76px}
+ .sidebar-collapsed .sidebar{padding:42px 12px 22px}
+ .sidebar-collapsed .sidebar>.brand{justify-content:center}
+ .sidebar-collapsed .sidebar>.brand>div{display:none}
+ .sidebar-collapsed .sidebar nav{margin-top:28px}
+ .sidebar-collapsed .sidebar nav button{font-size:0;padding:13px 0;text-align:center}
+ .sidebar-collapsed .sidebar nav button>span{width:auto;font-size:20px}
+ .sidebar-collapsed .sidebar-tools>.eyebrow{display:none}
+ .sidebar-collapsed .sidebar-tools button,.sidebar-collapsed #signout{font-size:0;padding:12px 0;text-align:center}
+ .sidebar-collapsed #guide-open::before{content:'?';font-size:20px}
+ .sidebar-collapsed #email-settings::before{content:'✉';font-size:20px}
+ .sidebar-collapsed #signout::before{content:'↪';font-size:20px}
+}
+@media(max-width:850px){
+ .sidebar{width:auto}.sidebar-toggle{position:static;margin-left:auto;order:1;flex-shrink:0}
+ .sidebar>.brand{order:0}.sidebar nav{order:3}.sidebar-bottom{order:2}
+ .sidebar-collapsed .sidebar nav,.sidebar-collapsed .sidebar-bottom{display:none}
+}
+@media(prefers-reduced-motion:reduce){.sidebar,.main,.sidebar-toggle span{transition:none!important}}
