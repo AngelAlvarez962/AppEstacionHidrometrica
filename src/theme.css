@@ -28,4 +28,28 @@ body,.sidebar,.main,.auth-story,.auth-panel,.station-card,.gateway-card,.entity-
 :root[data-theme=dark] :is(.summary strong,.sensor-distance strong,.card-level strong,.water-reading strong,.detail-sensor strong){color:var(--blue)}
 :root[data-theme=dark] :is(.sensor-distance>span,.sensor-distance>div>span,.sensor-distance small,.card-owner,.water-reading span){color:var(--muted)}
 :root[data-theme=dark] .icon-button{background:#22394d;color:#c4d5e5}
+:root[data-theme=dark] :is(.admin-intro,.inventory,.removed-stations){background:#152335;color:var(--ink);border-color:var(--line)}
+:root[data-theme=dark] .inventory-row{border-color:var(--line)}
+:root[data-theme=dark] :is(.inventory-row.head,.code-box,.generated-detail pre){background:#20364a;color:var(--ink);border-color:var(--line)}
+:root[data-theme=dark] .serial{color:#99deef}
+:root[data-theme=dark] :is(.tank,.tank-top,.tank-bottom){background:#152e43;color:var(--ink);border-color:var(--line)}
+:root[data-theme=dark] .secondary.destructive{color:#ffc0ce;border-color:#985c70}
+:root[data-theme=dark] .primary.destructive{background:#a62d4b;color:white}
+/* Small, consistent feedback without changing layout or status colors. */
+:root{--action-hover-bg:#dff3f7;--action-hover-ink:#075c79;--action-hover-border:#55aebf;--action-shadow:#087b9229;--danger-hover-bg:#fff0f3;--danger-hover-ink:#9c203c;--danger-hover-border:#d16a80}
+:root[data-theme=dark]{--action-hover-bg:#204457;--action-hover-ink:#a3eff5;--action-hover-border:#69c9d7;--action-shadow:#00000040;--danger-hover-bg:#482b3a;--danger-hover-ink:#ffc0ce;--danger-hover-border:#db879c}
+:is(.primary,.secondary,.icon-button,.text-button,.theme-toggle,.station-card,.sidebar nav button,.sidebar-tools button,.sidebar-bottom button,.auth-tabs button){transition:background-color .18s ease,color .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s ease,filter .18s ease}
+:is(.primary,.secondary,.icon-button,.text-button,.theme-toggle,.station-card,.sidebar nav button,.sidebar-tools button,.sidebar-bottom button,.auth-tabs button):focus-visible{outline:3px solid var(--action-hover-border);outline-offset:3px}
+.primary:disabled{filter:none}
+@media(hover:hover) and (pointer:fine){
+ :is(.primary,.secondary,.icon-button,.theme-toggle):not(:disabled):hover{transform:translateY(-2px);box-shadow:0 5px 13px var(--action-shadow)}
+ .primary:not(:disabled):hover{filter:brightness(1.08)}
+ :root :is(.secondary,.icon-button,.theme-toggle):not(:disabled):hover{background:var(--action-hover-bg);color:var(--action-hover-ink);border-color:var(--action-hover-border)}
+ :root :is(.sidebar nav button,.sidebar-tools button,.sidebar-bottom button,.auth-tabs button,.text-button):not(:disabled):hover{background:var(--action-hover-bg);color:var(--action-hover-ink)}
+ .text-button:not(:disabled):hover{text-decoration:underline;text-underline-offset:4px}
+ .station-card:not(:disabled):hover{transform:translateY(-3px);border-color:var(--action-hover-border);box-shadow:0 7px 20px var(--action-shadow)}
+ :root .secondary.destructive:not(:disabled):hover{background:var(--danger-hover-bg);color:var(--danger-hover-ink);border-color:var(--danger-hover-border)}
+ :is(.primary,.secondary,.icon-button,.theme-toggle,.station-card):not(:disabled):active{transform:translateY(0);box-shadow:none}
+}
+@media(prefers-reduced-motion:reduce){:is(.primary,.secondary,.icon-button,.text-button,.theme-toggle,.station-card,.sidebar nav button,.sidebar-tools button,.sidebar-bottom button,.auth-tabs button){transition:none!important;transform:none!important}}
 @media(prefers-reduced-motion:reduce){.theme-toggle svg,body,.sidebar,.main,.auth-story,.auth-panel,.station-card,.gateway-card,.entity-card,.detail,dialog,.setup-tour,.theme-toggle{transition:none!important;animation:none!important}}

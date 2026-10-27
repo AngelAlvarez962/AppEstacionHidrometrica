@@ -27,3 +27,7 @@ Pendientes: registro libre de estaciones de terceros; visualizador sin Internet;
 26/10/2026: el logo de acceso se integra visualmente con el fondo mediante mezcla de color, eliminando el recuadro blanco visible sin alterar el archivo original de marca.
 
 27/10/2026: se añade modo claro/oscuro con botón animado y preferencia local; tutorial práctico con resultados ilustrativos que cambian al escribir sin guardar equipos; adaptación centrada para pantallas ultraanchas. Ver DISENO-Y-TUTORIAL-2026-10-27.md. Propuestas visuales A y B guardadas para elegir, sin aplicar rediseño general. No cambia hardware ni permisos de cuentas.
+
+27/10/2026: botones y tarjetas interactivas con transiciones de color, contraste y elevación suave al pasar el mouse. Paletas clara y oscura, foco de teclado visible, acciones destructivas en rojo, controles deshabilitados sin animación y respeto a movimiento reducido. Cambio sólo visual.
+
+27/10/2026: corregido el contraste oscuro de los bloques de conexión de gateway, entidades internas, preparación de kits e inventario. También se cubren códigos de preparación, equipos retirados y etiquetas del nivel de agua para evitar fondos claros con texto claro.
