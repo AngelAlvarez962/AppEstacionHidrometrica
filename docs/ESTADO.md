@@ -25,3 +25,5 @@ Pendientes: registro libre de estaciones de terceros; visualizador sin Internet;
 26/10/2026: por ajuste posterior del usuario, se retira el logo gráfico del encabezado del panel y se conserva la mención discreta Una aplicación de Ideas Disruptivas en su pie. El logo del acceso y su archivo original se conservan.
 
 26/10/2026: el logo de acceso se integra visualmente con el fondo mediante mezcla de color, eliminando el recuadro blanco visible sin alterar el archivo original de marca.
+
+27/10/2026: se añade modo claro/oscuro con botón animado y preferencia local; tutorial práctico con resultados ilustrativos que cambian al escribir sin guardar equipos; adaptación centrada para pantallas ultraanchas. Ver DISENO-Y-TUTORIAL-2026-10-27.md. Propuestas visuales A y B guardadas para elegir, sin aplicar rediseño general. No cambia hardware ni permisos de cuentas.
