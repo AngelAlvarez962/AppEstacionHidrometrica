@@ -33,3 +33,5 @@ Pendientes: registro libre de estaciones de terceros; visualizador sin Internet;
 27/10/2026: corregido el contraste oscuro de los bloques de conexión de gateway, entidades internas, preparación de kits e inventario. También se cubren códigos de preparación, equipos retirados y etiquetas del nivel de agua para evitar fondos claros con texto claro.
 
 27/10/2026: acceso compacto adaptado a la altura de pantalla, revisado en 1280x720 y 1100x600 sin recortar controles; registro y acceso mantienen todos sus campos. Selector de tema estable en la página, sin trasladarlo a los formularios. Menú lateral retráctil con animación, iconos, preferencia local y respeto a movimiento reducido. La guía expande el menú al abrirla desde Ayuda. Revisadas navegación y persistencia; suite y compilación correctas.
+
+27/10/2026: separación de 20 px entre la introducción de conexión y la lista/estado vacío de gateways. Control de menú reubicado debajo de la marca con icono de panel lateral, etiqueta Ocultar menú al desplegar y área de pulsación mayor; mantiene animación y versión móvil. Revisión visual en claro y oscuro, menú abierto y contraído; compilación correcta.

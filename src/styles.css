@@ -86,16 +86,22 @@
 /* The menu keeps the same navigation targets when folded into an icon rail. */
 .sidebar{width:var(--sidebar-width);transition:width .24s ease,padding .24s ease,background-color .25s ease}
 .main{transition:width .24s ease,margin-left .24s ease}
-.sidebar-toggle{position:absolute;top:8px;right:8px;display:grid;place-items:center;width:28px;height:28px;border:1px solid var(--line);border-radius:8px;background:transparent;color:var(--blue)}
-.sidebar-toggle span{font-size:24px;line-height:1;transition:transform .24s ease}
-.sidebar-collapsed .sidebar-toggle span{transform:rotate(180deg)}
+.sidebar-toggle{display:flex;align-items:center;justify-content:flex-start;gap:10px;flex-shrink:0;width:100%;min-height:40px;padding:9px 12px;margin-top:20px;border:1px solid var(--line);border-radius:10px;background:transparent;color:var(--blue);font-size:11px;font-weight:650;white-space:nowrap;transition:background-color .18s ease,border-color .18s ease}
+.sidebar-toggle svg{width:20px;height:20px;flex-shrink:0;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.sidebar-icon-divider,.sidebar-icon-content{transition:transform .24s ease,opacity .24s ease}
+.sidebar-collapsed .sidebar-icon-divider{transform:translateX(4px)}
+.sidebar-collapsed .sidebar-icon-content{opacity:0}
 .sidebar-toggle:hover{background:var(--action-hover-bg)}
+.sidebar nav{margin-top:20px}
+.gateway-grid{margin-top:20px}
 @media(min-width:851px){
  :root.sidebar-collapsed{--sidebar-width:76px}
- .sidebar-collapsed .sidebar{padding:42px 12px 22px}
+ .sidebar-collapsed .sidebar{padding:24px 12px 22px}
  .sidebar-collapsed .sidebar>.brand{justify-content:center}
  .sidebar-collapsed .sidebar>.brand>div{display:none}
- .sidebar-collapsed .sidebar nav{margin-top:28px}
+ .sidebar-collapsed .sidebar-toggle{justify-content:center;padding:9px 0}
+ .sidebar-collapsed .sidebar-toggle-label{display:none}
+ .sidebar-collapsed .sidebar nav{margin-top:20px}
  .sidebar-collapsed .sidebar nav button{font-size:0;padding:13px 0;text-align:center}
  .sidebar-collapsed .sidebar nav button>span{width:auto;font-size:20px}
  .sidebar-collapsed .sidebar-tools>.eyebrow{display:none}
@@ -105,8 +111,8 @@
  .sidebar-collapsed #signout::before{content:'↪';font-size:20px}
 }
 @media(max-width:850px){
- .sidebar{width:auto}.sidebar-toggle{position:static;margin-left:auto;order:1;flex-shrink:0}
+ .sidebar{width:auto}.sidebar-toggle{width:40px;margin:0 0 0 auto;justify-content:center;padding:9px;order:1}.sidebar-toggle-label{display:none}
  .sidebar>.brand{order:0}.sidebar nav{order:3}.sidebar-bottom{order:2}
  .sidebar-collapsed .sidebar nav,.sidebar-collapsed .sidebar-bottom{display:none}
 }
-@media(prefers-reduced-motion:reduce){.sidebar,.main,.sidebar-toggle span{transition:none!important}}
+@media(prefers-reduced-motion:reduce){.sidebar,.main,.sidebar-toggle,.sidebar-icon-divider,.sidebar-icon-content{transition:none!important}}
