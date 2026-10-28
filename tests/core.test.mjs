@@ -43,3 +43,16 @@ test('sesión permanece por pestaña y PKCE puede completarse desde un correo',(
  a.setItem('channel-1-code-verifier','verificador');assert.equal(b.getItem('channel-2-code-verifier'),'verificador');b.removeItem('channel-2-code-verifier');assert.equal(a.getItem('channel-1-code-verifier'),null);
  b.removeItem('channel-2');assert.equal(a.getItem('channel-1'),'token-cuenta-A');
 });
+
+test('recordarme persiste sólo por elección y deja de compartir la sesión al desactivarlo',()=>{
+ const memory=()=>{const values=new Map();return {getItem:k=>values.get(k)??null,setItem:(k,v)=>values.set(k,v),removeItem:k=>values.delete(k)}};
+ const shared=memory(),tab=memory(),first=authStorage(tab,shared);
+ assert.equal(first.remembered,false);first.setItem('auth','temporal');
+ assert.equal(authStorage(memory(),shared).getItem('auth'),null);
+ first.setRemember(true);first.setItem('auth','sesion-recordada');first.setItem('auth-user','usuario');
+ const reopened=authStorage(memory(),shared);assert.equal(reopened.remembered,true);assert.equal(reopened.getItem('auth'),'sesion-recordada');assert.equal(reopened.getItem('auth-user'),'usuario');
+ reopened.setItem('auth','token-renovado');assert.equal(authStorage(memory(),shared).getItem('auth'),'token-renovado');
+ reopened.setRemember(false);assert.equal(authStorage(memory(),shared).getItem('auth'),null);assert.equal(authStorage(memory(),shared).getItem('auth-user'),null);
+ assert.equal(first.getItem('auth'),'sesion-recordada');
+ first.setRemember(true);first.setItem('auth','nuevo-token');first.removeItem('auth');assert.equal(authStorage(memory(),shared).getItem('auth'),null);
+});

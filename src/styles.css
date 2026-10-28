@@ -129,3 +129,21 @@
 @media(prefers-reduced-motion:reduce){.auth-tabs::before{transition:none}}
 /* Square-corner appearance trial; keep branding and connection dots intact. */
 :root :is(button,input,select,dialog,.visual-screen,.visual-chip,.summary>div,.station-card,.gateway-card,.entity-card,.detail,.admin-intro,.inventory,.removed-stations,.empty,.info,.sensor-distance,.detail-sensor,.user-pill,.demo-banner,.status,.node-code,.progress,.progress>div,.tank,.tank-top,.tank-bottom,.code-box,.generated-detail pre,.toast,.setup-tour,.tour-result,.tour-result-card,.tour-highlight){border-radius:0}
+/* Access screen refinements, independent of the dashboard appearance trial. */
+:root .auth-view .visual-screen{border-radius:20px}
+:root #auth-form input:not([type=checkbox]){border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--ink);border-radius:0;padding:10px 0;box-shadow:none;transition:border-color .18s ease}
+:root #auth-form input:not([type=checkbox]):focus{outline:0;border-bottom:2px solid var(--blue);padding-bottom:9px}
+:root #auth-form label:focus-within{color:var(--blue)}
+:root #auth-form .remember-choice{display:flex;align-items:center;gap:9px;font-size:12px;font-weight:500;color:var(--muted);cursor:pointer;margin:16px 0}
+:root #remember-me{display:inline-block;width:16px;height:16px;margin:0;accent-color:var(--teal);cursor:pointer;flex-shrink:0}
+:root #forgot,:root #forgot:hover,:root #forgot:focus-visible{background:transparent;border:0;box-shadow:none;color:var(--blue)}
+:root #forgot:hover{color:var(--teal);text-decoration:underline;text-underline-offset:4px}
+:root #theme-toggle{width:62px;height:34px;padding:3px;display:block;border:1px solid #9bcad3;border-radius:999px;background:#d9edf2;color:#087b94;box-shadow:none;overflow:visible}
+:root #theme-toggle:hover{background:#c7e4eb;color:#087b94;transform:none;box-shadow:none}
+:root #theme-toggle .theme-thumb{position:absolute;left:3px;top:3px;display:grid;place-items:center;width:26px;height:26px;background:#fff;border-radius:50%;box-shadow:0 1px 4px #092c4333;transform:translateX(0);transition:transform .26s ease}
+:root #theme-toggle svg{width:18px;height:18px}
+:root[data-theme=dark] #theme-toggle{background:#138b80;border-color:#138b80;color:#11695f}
+:root[data-theme=dark] #theme-toggle:hover{background:#169e91}
+:root[data-theme=dark] #theme-toggle .theme-thumb{transform:translateX(28px)}
+@media(prefers-reduced-motion:reduce){:root #theme-toggle .theme-thumb,:root #auth-form input{transition:none}}
+@media(max-width:620px){.auth-brand-row{padding-right:48px}}
