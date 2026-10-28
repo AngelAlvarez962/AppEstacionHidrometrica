@@ -36,6 +36,16 @@ Devuelve `admin`, `kits`, `gateways`, `stations` y `readings` pertenecientes al 
 
 Las estaciones tienen UUID `id`, UUID `kit_id`, UUID `gateway_id` (puede ser null durante configuración), `friendly_code`, `setup_pending`, `serial` global, `node_label`, nombre, ubicación y cuatro medidas. Los cuatro valores de calibración son inicialmente `null`; se guardan juntos.
 
+## POST /api/kits · Registro propio (actual)
+
+`{action:"register-owned",request_id:"UUID-NUEVO",kind:"complete",name:"Mi estación",node_label:"RIO_01",gateway_id:null}`
+
+Requiere correo confirmado. kind: complete, station o gateway. El propietario se toma de auth.uid(), nunca del cuerpo. En station, gateway_id puede ser un receptor de la misma cuenta; null deja la configuración pendiente. node_label debe coincidir con el LoRa y admite 1–32 letras, cifras, guion o guion bajo.
+
+Devuelve 201 con kit_id, station_id y gateway_id (null cuando no corresponde). Se conserva el mismo request_id al reintentar para evitar duplicados. La transacción bloquea por cuenta, limita a 20 altas/hora y rechaza una estación activa con igual identificador en ese gateway. No entrega claves de dispositivo. La preparación física por USB sigue usando prueba/confirmación del receptor y credenciales limitadas.
+
+La migración 008 está aplicada. La pantalla de preparación administrativa se retiró; las rutas create/claim se conservan para compatibilidad con equipos/códigos anteriores. No reejecutar migraciones aplicadas.
+
 ## POST /api/kits · Reclamar kit
 
 ```json

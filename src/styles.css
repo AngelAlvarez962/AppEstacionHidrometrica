@@ -83,6 +83,10 @@
  .auth-box h2{font-size:25px}.auth-tabs{margin:12px 0}.auth-box>p{font-size:12px}
  .story-content h1{font-size:34px}.visual-screen{padding:12px}.wave{height:40px;margin:9px 0}
 }
+.animated-select-native{position:absolute!important;width:1px!important;height:1px!important;opacity:0!important;pointer-events:none!important;clip-path:inset(50%);padding:0!important;border:0!important}
+.select-error{display:block;margin-top:6px;color:#b72d46;font-size:11px;line-height:1.5}
+:root[data-theme=dark] .select-error{color:#ffb6c4}
+.demo-banner label .animated-select{margin:0;min-width:160px}.animated-select{max-width:100%}
 /* The menu keeps the same navigation targets when folded into an icon rail. */
 .sidebar{width:var(--sidebar-width);transition:width .24s ease,padding .24s ease,background-color .25s ease}
 .main{transition:width .24s ease,margin-left .24s ease}

@@ -1,7 +1,7 @@
 import {createTourExample,updateTourExample,exampleResultHtml} from './tour-example.js';
 // All practice changes stay in a disposable model, never in an account snapshot.
 export const tourSteps = [
- {view:'stations',target:'#claim-open',title:'Tus equipos',text:'Aquí aparecen tus estaciones. Si todavía no tienes equipos, pulsa Agregar equipos al salir del recorrido y usa el código de tu kit.'},
+ {view:'stations',target:'#claim-open',title:'Tus equipos',text:'Aquí aparecen tus estaciones. Si todavía no tienes equipos, pulsa Agregar equipos al salir del recorrido y registra tu estación o gateway en tu cuenta.'},
  {view:'stations',detail:true,target:'#edit-station',title:'Abre tu estación',text:'Selecciona una estación para ver sus medidas e historial. Configurar estación abre sus datos de instalación.'},
  {view:'stations',form:'station',target:'[name="name"]',title:'Nombre, ubicación y receptor',text:'Prueba un nombre y una ubicación. La tarjeta de ejemplo cambia mientras escribes. En la configuración real elegirás un gateway de tu cuenta; aquí no se guardan cambios.'},
  {view:'stations',form:'station',target:'[name="bed_height"]',title:'Introduce las medidas reales',text:'Sensor a fondo: desde la cara del sensor hasta el punto de cero de agua. Fondo a tope: altura que representa el 100%. Usa centímetros; no copies las medidas de otra instalación.'},
@@ -24,7 +24,7 @@ export function installSetupTour(ctx){
  function practiceForm(type){
   const form=$('modal-content').querySelector('form');if(!form)return;
   form.onsubmit=event=>event.preventDefault();
-  form.querySelectorAll('button').forEach(button=>button.disabled=true);
+  form.querySelectorAll('button:not(.select-trigger):not([role=option])').forEach(button=>button.disabled=true);
   form.querySelectorAll('input,select,textarea').forEach(input=>{
    input.disabled=false;
    if(input.name==='gateway_id'){input.innerHTML='<option value="tour-gateway">Gateway de ejemplo</option>';return}

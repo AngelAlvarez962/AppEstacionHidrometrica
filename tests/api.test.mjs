@@ -7,6 +7,11 @@ const bearer='signed_test_user_token_12345';
 function res(){return {headers:{},setHeader(k,v){this.headers[k]=v},status(code){this.code=code;return this},json(value){this.value=value;return this}}}
 const req=(method,body,token=bearer)=>({method,body,headers:{authorization:'Bearer '+token,'content-type':'application/json'}});
 const response=data=>new Response(JSON.stringify(data),{status:200});
+test('alta propia usa JWT del usuario y nunca permite escoger otro propietario',async()=>{
+ const calls=[],fetcher=async(url,options)=>{calls.push({url,options});return response(url.endsWith('/auth/v1/user')?{id:owner,email_confirmed_at:'now'}:{station_id:station})};
+ const r=res();await makeHandler('kits',{env,fetcher})(req('POST',{action:'register-owned',request_id:station,kind:'station',name:'Mi estación',node_label:'RIO_02',gateway_id:null,owner_id:station}),r);
+ assert.equal(r.code,201);const call=calls.find(c=>c.url.endsWith('/rpc/kit_register_owned'));assert(call);assert.equal(call.options.headers.Authorization,'Bearer '+bearer);assert.equal(call.options.headers.apikey,env.SUPABASE_PUBLISHABLE_KEY);assert(!call.options.body.includes('owner'));assert.equal(JSON.parse(call.options.body).p_node,'RIO_02');
+});
 test('config no expone secretos, ni acepta una clave privada como pública',async()=>{
   const result=publicConfig(env);assert.equal(result.key,env.SUPABASE_PUBLISHABLE_KEY);assert(!JSON.stringify(result).includes(env.SUPABASE_SECRET_KEY));
   assert.equal(publicConfig({...env,SUPABASE_PUBLISHABLE_KEY:env.SUPABASE_SECRET_KEY}).configured,false);

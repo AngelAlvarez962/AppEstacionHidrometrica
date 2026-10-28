@@ -2,12 +2,15 @@
 
 Entra con tu cuenta. La guía aparece al empezar y puedes volver a abrirla con **Guía de configuración**. El administrador tiene sus herramientas por separado.
 
-1. En **Mis estaciones**, abre tu estación y revisa **Configurar estación**. Elige su receptor y guarda las medidas reales y los avisos. La distancia del sensor y el nivel calculado se muestran por separado.
-2. En **Mis gateways**, pulsa **Conectar por USB**. Utiliza un cable de datos, elige el receptor que conectaste y selecciona su puerto. Cierra el monitor serie de Arduino si está abierto.
-3. Espera a que se detecte el receptor y pulsa **Guardar gateway**. La vinculación se conserva en tu cuenta aunque retires el USB. Si había otro gateway, confirma el cambio y elige cuáles de tus estaciones lo utilizarán. Puedes cancelar; los equipos y el historial se conservan.
-4. Con el USB conectado, pulsa **Configurar Wi-Fi**. Guarda una red de **2.4 GHz** y su contraseña. La contraseña se guarda en el receptor, no en la cuenta ni en el navegador.
-5. Espera a ver **Internet comprobado**. Esto significa que llegó una lectura enviada directamente por el receptor. “Wi-Fi guardado” por sí solo no confirma la conexión.
-6. Desconecta el USB de la computadora y alimenta el receptor con su cargador. Deja la estación encendida y el gateway dentro del alcance de su Wi-Fi. Revisa que la hora de la última lectura siga cambiando.
+1. Si aún no tienes equipos, pulsa **Agregar equipos → Agregar equipo nuevo**. Elige estación + gateway, solo estación o solo gateway. Escribe su nombre y el identificador de radio que transmite el LoRa; si agregas una estación adicional puedes elegir un gateway propio. No necesitas un código preparado por el administrador.
+2. En **Mis estaciones**, abre tu estación y revisa **Configurar estación**. Elige su receptor y guarda las medidas reales y los avisos. La distancia del sensor y el nivel calculado se muestran por separado.
+3. En **Mis gateways**, pulsa **Conectar por USB**. Utiliza un cable de datos, elige el receptor que conectaste y selecciona su puerto. Cierra el monitor serie de Arduino si está abierto.
+4. Espera a que se detecte el receptor y pulsa **Guardar gateway**. La vinculación se conserva en tu cuenta aunque retires el USB. Si había otro gateway, confirma el cambio y elige cuáles de tus estaciones lo utilizarán. Puedes cancelar; los equipos y el historial se conservan.
+5. Con el USB conectado, pulsa **Configurar Wi-Fi**. Guarda una red de **2.4 GHz** y su contraseña. La contraseña se guarda en el receptor, no en la cuenta ni en el navegador.
+6. Espera a ver **Internet comprobado**. Esto significa que llegó una lectura enviada directamente por el receptor. “Wi-Fi guardado” por sí solo no confirma la conexión.
+7. Desconecta el USB de la computadora y alimenta el receptor con su cargador. Deja la estación encendida y el gateway dentro del alcance de su Wi-Fi. Revisa que la hora de la última lectura siga cambiando.
+
+Si agregas una estación a un gateway que ya usa Internet, vuelve a guardar la configuración Wi-Fi para incluir la estación en el receptor. Los códigos de activación anteriores siguen disponibles dentro de Agregar equipos.
 
 ## Si no llegan medidas
 
