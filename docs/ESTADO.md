@@ -49,3 +49,5 @@ Pendientes: registro libre de estaciones de terceros; visualizador sin Internet;
 28/10/2026: nuevo símbolo del sitio basado en la propuesta 4, monograma H con onda de agua. Activo en acceso, menú lateral e icono del navegador mediante public/marca-h.svg. SVG escalable y variante de contraste oscuro integrada; se conserva la marca de Ideas Disruptivas y el nombre Hackeando las inundaciones. Revisión visual clara/oscura y compilación correctas.
 
 28/10/2026: refinado el monograma H con silueta unificada, trazos más sólidos, esquinas suavizadas y una única onda en espacio negativo. Paleta simplificada a azul marino/turquesa y variante oscura de alto contraste. Referencias del logo versionadas para renovar caché. Revisado en ambos temas; compilación correcta.
+
+28/10/2026: icono Actualizar redibujado con arco circular y punta separada, sin el tramo que comprimía la flecha. Revisión visual y compilación correctas.
