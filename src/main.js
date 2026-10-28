@@ -1,5 +1,4 @@
 import {installSetupTour} from './setup-tour.js';
-import {createTourExample,exampleResultHtml} from './tour-example.js';
 import {installGatewayUI} from './gateway-ui.js';
 import {internetConfirmed} from './gateway.js';
 import {createEmailRequester} from './email-access.js';
@@ -16,7 +15,11 @@ import {installSidebar} from './sidebar.js';
 installSidebar();
 const $=id=>document.getElementById(id),escape=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const number=value=>Number(value.toFixed(1)).toLocaleString('es-MX');
-function renderAccessDemo(){const example=createTourExample();example.name='Estación de ejemplo';example.location='Ubicación de ejemplo';example.entity='Mi entidad';example.distance_cm=Number((45+Math.random()*40).toFixed(1));document.querySelector('.access-demo').innerHTML='<div class="access-demo-label"><span class="eyebrow">ASÍ PODRÍA VERSE TU ESTACIÓN</span><span class="node-code">MINI DEMO</span></div>'+exampleResultHtml(example,'station',escape)+'<p class="access-demo-note">Datos simulados al abrir la página. No son mediciones reales.</p>'}
+function renderAccessDemo(){
+ const distance=Number((45+Math.random()*40).toFixed(1)),level=Number((100-distance).toFixed(1));
+ document.querySelector('.access-demo').innerHTML=`<article class="station-card access-station" aria-label="Tarjeta de estación de demostración"><div class="card-top"><span class="node-code">EST-EJEMPLO</span><span class="status normal">Normal</span></div><h2>Estación de ejemplo</h2><p class="location">Instalación de demostración</p><p class="card-owner">Mi entidad</p><div class="sensor-distance"><span>Distancia medida por el sensor</span><div><strong>${number(distance)}</strong><span>cm</span></div><small>Dato de ejemplo</small></div><div class="card-level"><small class="calculated-label">Nivel de agua calculado</small><strong>${number(level)}</strong><span>cm de agua</span><small>${number(level)}% de la altura configurada</small></div><div class="progress"><div style="width:${level}%"></div></div><footer><span>Datos simulados · No son lecturas reales</span><button type="button" class="access-demo-open">Ver ejemplo →</button></footer></article>`;
+ document.querySelector('.access-demo-open').onclick=()=>$('demo-start').click();
+}
 renderAccessDemo();
 const clock=value=>new Date(value).toLocaleTimeString('es-MX',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
 let supabase=null,session=null,demo=null,mode='login',view='stations',selected=null,snapshot={stations:[],gateways:[],readings:[],kits:[],admin:false},generation=0,loading=false,authBusy=false,toastTimer,syncFailed=false;
