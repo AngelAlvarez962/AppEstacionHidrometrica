@@ -1,7 +1,9 @@
 import {stationOwner} from './onboarding.js';
+import {animatedSelect} from './animated-select.js';
 export function installEntities(ctx){
  const {$,escape,openModal,bindModal,api,reload,showToast}=ctx;
  let entityFilter='all',ownerFilter='all';
+ const entityMenu=animatedSelect($('entity-filter'),'Entidad'),ownerMenu=animatedSelect($('owner-filter'),'Usuario');
  const data=()=>ctx.getSnapshot(),demo=()=>ctx.getDemo(),scope=()=>data().admin?'admin':'personal';
  const entities=()=>data().admin?(data().adminEntities||[]):(data().personalEntities||[]).filter(e=>e.owner_id===ctx.getUser()?.id);
  function ownerId(station){return stationOwner(station,data())}
@@ -23,6 +25,7 @@ export function installEntities(ctx){
   const owners=(data().profiles||[]).filter(p=>data().kits.some(k=>k.owner_id===p.user_id));if(!owners.some(p=>p.user_id===ownerFilter))ownerFilter='all';
   $('entity-filter').innerHTML='<option value="all">Todas las entidades</option><option value="unassigned">Sin entidad</option>'+entities().map(e=>`<option value="${escape(e.id)}">${escape(e.name)}</option>`).join('');$('entity-filter').value=entityFilter;
   $('owner-filter-label').hidden=!data().admin;$('owner-filter').innerHTML='<option value="all">Todos los usuarios</option>'+owners.map(p=>`<option value="${escape(p.user_id)}">${escape(p.display_name)}</option>`).join('');$('owner-filter').value=ownerFilter;
+  entityMenu.sync();ownerMenu.sync();
   document.querySelector('[data-view=entities]').innerHTML='<span>▱</span>'+(data().admin?'Entidades internas':'Mis entidades');
   $('entities-heading').textContent=data().admin?'Tu organización interna':'Organiza tus estaciones';$('entities-description').textContent=data().admin?'Estas entidades son privadas de administración. No cambian las entidades personales de los usuarios.':'Agrupa tus estaciones por ubicación o uso. Cada cuenta tiene sus propias entidades.';
   $('entities-list').innerHTML=entities().length?entities().map(e=>`<article class="entity-card"><span class="eyebrow">${data().admin?'ORGANIZACIÓN INTERNA':'MI ENTIDAD'}</span><h2>${escape(e.name)}</h2><p>${data().stations.filter(s=>entityId(s)===e.id).length} estaciones</p><div class="toolbar-actions"><button class="secondary" data-entity-view="${escape(e.id)}">Ver estaciones</button><button class="secondary" data-entity-rename="${escape(e.id)}">Renombrar</button><button class="secondary destructive" data-entity-delete="${escape(e.id)}">Eliminar</button></div></article>`).join(''):'<div class="empty"><h2>Crea tu primera entidad</h2><p>Organiza tus estaciones de la forma que te resulte útil.</p></div>';

@@ -1,6 +1,7 @@
 export function installSidebar(){
  const root=document.documentElement,sidebar=document.querySelector('.sidebar');
  sidebar.id='app-navigation';
+ const themeRow=document.createElement('div');themeRow.className='sidebar-theme';themeRow.innerHTML='<span>Tema</span>';sidebar.querySelector('.sidebar-bottom').prepend(themeRow);
  const toggle=document.createElement('button');
  toggle.type='button';toggle.className='sidebar-toggle';toggle.setAttribute('aria-controls',sidebar.id);
  toggle.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3" y="4" width="18" height="16" rx="2"/><path class="sidebar-icon-divider" d="M9 4v16"/><path class="sidebar-icon-content" d="M12 8h5m-5 4h5m-5 4h5"/></svg><span class="sidebar-toggle-label">Ocultar menú</span>';
