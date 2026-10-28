@@ -116,3 +116,13 @@
  .sidebar-collapsed .sidebar nav,.sidebar-collapsed .sidebar-bottom{display:none}
 }
 @media(prefers-reduced-motion:reduce){.sidebar,.main,.sidebar-toggle,.sidebar-icon-divider,.sidebar-icon-content{transition:none!important}}
+/* A wider illustration uses the left column without expanding the login form. */
+@media(min-width:900px){.story-visual{max-width:100%}.story-visual .wave{height:clamp(70px,16dvh,150px)}}
+.auth-tabs{position:relative;isolation:isolate;border-radius:10px 10px 0 0}
+.auth-tabs::before{content:'';position:absolute;inset:0 auto 0 0;width:50%;background:var(--action-hover-bg);border-bottom:2px solid var(--blue);border-radius:10px 10px 0 0;z-index:-1;transform:translateX(0);transition:transform .2s ease}
+.auth-tabs.signup-selected::before{transform:translateX(100%)}
+:root .auth-tabs button.active{background:transparent;border-bottom-color:transparent}
+.demo-banner{flex-wrap:wrap}.demo-banner #demo-exit{margin-left:auto;white-space:normal}
+.demo-finish-actions{flex-wrap:wrap}
+@media(max-width:620px){.demo-banner #demo-exit{width:100%;margin:0}.demo-finish-actions button{width:100%;white-space:normal}}
+@media(prefers-reduced-motion:reduce){.auth-tabs::before{transition:none}}

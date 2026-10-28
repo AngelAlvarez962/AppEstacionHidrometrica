@@ -25,7 +25,9 @@ function showToast(message){$('toast').textContent=message;$('toast').hidden=fal
 function message(id,value,error=false){$(id).textContent=value;$(id).classList.toggle('error',error)}
 function latest(station){return snapshot.readings.filter(r=>r.station_id===station.id).at(-1)}
 function state(station){return pendingStation(station)?{state:'uncalibrated',label:'Completa la configuración'}:syncFailed&&!demo?{state:'offline',label:'Sin actualización'}:measurement(station,latest(station))}
-function setAuthMode(next){mode=next;message('auth-status','');const recovery=mode==='update',signup=mode==='signup',reset=mode==='reset';
+function animateEntrance(element,side=1){if(!element||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;element.getAnimations().forEach(animation=>animation.cancel());element.animate([{opacity:.4,transform:`translateX(${side*12}px)`},{opacity:1,transform:'translateX(0)'}],{duration:180,easing:'ease-out'})}
+function setAuthMode(next){const previous=mode;mode=next;message('auth-status','');const recovery=mode==='update',signup=mode==='signup',reset=mode==='reset';
+  $('auth-tabs').classList.toggle('signup-selected',signup);
   $('auth-heading').textContent={login:'Bienvenido de nuevo',signup:'Crea tu espacio',reset:'Recupera tu acceso',update:'Elige una nueva contraseña'}[mode];
   $('auth-description').textContent={login:'Entra para consultar y configurar tus equipos.',signup:'Registra tu cuenta y después activa el equipo que vas a utilizar.',reset:'Te enviaremos un enlace a tu correo.',update:'Guarda la nueva contraseña de tu cuenta.'}[mode];
   $('name-label').hidden=!signup;$('name-label').querySelector('input').required=signup;
@@ -34,9 +36,10 @@ function setAuthMode(next){mode=next;message('auth-status','');const recovery=mo
   $('auth-submit').textContent={login:'Entrar a mis equipos',signup:'Crear mi cuenta',reset:'Enviar enlace de recuperación',update:'Guardar contraseña'}[mode];
   $('auth-tabs').hidden=recovery;$('forgot').textContent=reset?'Volver al inicio de sesión':'Olvidé mi contraseña';$('forgot').hidden=recovery;$('demo-start').parentElement.hidden=recovery;
   document.querySelectorAll('[data-mode]').forEach(b=>b.classList.toggle('active',b.dataset.mode===mode));
+  if(previous!==next)animateEntrance($('auth-form'),signup?1:-1);
 }
 function showAuth(){tour.stop();setupLocked=false;stationDetailOpen=false;groups.resetFilters();generation++;loading=false;syncFailed=false;snapshot={stations:[],gateways:[],readings:[],kits:[],admin:false};selected=null;$('app-view').hidden=true;$('auth-view').hidden=false;$('loading').hidden=true;$('modal').close();$('auth-form').reset();setAuthMode('login')}
-function showApp(){const user=demo?demo.user:session?.user;if(!user)return;$('loading').hidden=true;$('auth-view').hidden=true;$('app-view').hidden=false;$('demo-banner').hidden=!demo;$('user-name').textContent=user.user_metadata?.display_name||user.email;$('demo-account').value=demo?.account||'ana';render()}
+function showApp(){const user=demo?demo.user:session?.user;if(!user)return;$('loading').hidden=true;$('auth-view').hidden=true;$('app-view').hidden=false;$('demo-banner').hidden=!demo;$('user-name').textContent=user.user_metadata?.display_name||user.email;$('demo-account').value=demo?.account||'ana';const exitLabel=demo?'Volver al inicio de sesión':'Cerrar sesión';$('signout').textContent=exitLabel;$('signout').title=exitLabel;$('signout').setAttribute('aria-label',exitLabel);render()}
 async function api(method='GET',body){
   const {data,error}=await supabase.auth.getSession();if(error||!data.session)throw Error('Tu sesión terminó. Vuelve a entrar.');
   const response=await fetch('/api/kits',{method,headers:{Authorization:'Bearer '+data.session.access_token,...(body?{'Content-Type':'application/json'}:{})},body:body?JSON.stringify(body):undefined});
@@ -47,7 +50,7 @@ async function reload(){if(loading||(!session&&!demo))return;const current=++gen
   catch(error){if(current!==generation)return;syncFailed=true;$('cloud-notice').hidden=false;$('cloud-notice').textContent=error.message;render();}
   finally{if(current===generation){loading=false;$('refresh').disabled=false;if(!syncFailed)ensureSetup()}}
 }
-function switchView(next){stationDetailOpen=false;view=next;render()}
+function switchView(next){const previous=view;stationDetailOpen=false;view=next;render();if(previous!==view)animateEntrance($(view+'-section'))}
 function openStationDetail(id){
   if(!groups.visibleStations().some(s=>s.id===id))return;
   overviewScroll=window.scrollY;selected=id;stationDetailOpen=true;view='stations';render();
@@ -62,7 +65,7 @@ function render(){
   if(!session&&!demo)return;
   groups.render();gatewayUI.render();const shown=groups.visibleStations();if(!shown.some(s=>s.id===selected)){selected=shown[0]?.id||null;stationDetailOpen=false;}
   const detailActive=view==='stations'&&stationDetailOpen&&!!selected;
-  $('station-overview').hidden=detailActive;$('equipment-summary').hidden=detailActive;
+  $('station-overview').hidden=detailActive;$('equipment-summary').hidden=detailActive||view!=='stations';
   $('monitor-header').hidden=detailActive;
   $('email-settings').hidden=detailActive;$('claim-open').hidden=detailActive;
   if(view==='admin'&&!snapshot.admin)view='stations';
@@ -126,13 +129,21 @@ const tour=installSetupTour({$,escape,switchView,showToast,
  previewDetail(){groups.resetFilters();const station=snapshot.stations.find(s=>s.id===selected)||snapshot.stations[0];if(!station)return false;openStationDetail(station.id);return true},
  previewStation(){const station=snapshot.stations.find(s=>s.id===selected)||snapshot.stations[0];openStation(station?.id,false,true);return true},
  previewEntity(){groups.entityForm()},
- async complete(){if(demo)demo.guideCompleted=true;else await api('PATCH',{action:'guide',completed:true})}
+ async complete(){if(demo)demo.guideCompleted=true;else await api('PATCH',{action:'guide',completed:true})},
+ afterComplete(){if(demo)showDemoFinish()}
 });
+const demoExit=document.createElement('button');demoExit.id='demo-exit';demoExit.className='secondary';demoExit.type='button';demoExit.textContent='Volver al inicio de sesión';demoExit.hidden=true;$('demo-banner').append(demoExit);
+demoExit.onclick=()=>{if(demo)$('signout').click()};
+function showDemoFinish(){
+ demoExit.hidden=false;
+ openModal('Terminaste el recorrido', '<p class="modal-copy">Estás en una demostración con datos de ejemplo, sin iniciar sesión. Puedes seguir conociendo la app o volver para entrar a tu cuenta.</p><div class="modal-actions demo-finish-actions"><button id="demo-finish-back" class="secondary">Volver al inicio de sesión</button><button id="demo-finish-stay" class="primary">Seguir explorando</button></div>');
+ $('demo-finish-back').onclick=()=>demoExit.click();$('demo-finish-stay').onclick=()=>{$('modal').close();demoExit.focus()};
+}
 $('back-stations').onclick=backToStations;
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>setAuthMode(b.dataset.mode));document.querySelectorAll('[data-view]').forEach(b=>b.onclick=()=>{if(tour.active)tour.stop();switchView(b.dataset.view)});
 $('forgot').onclick=()=>setAuthMode(mode==='reset'?'login':'reset');$('modal-close').onclick=()=>{if(tour.active){tour.stop();return}if(!setupLocked)$('modal').close()};$('modal').addEventListener('cancel',event=>{if(tour.active){event.preventDefault();tour.stop();return}if(setupLocked)event.preventDefault()});$('modal').addEventListener('close',()=>{queueMicrotask(ensureSetup)});$('claim-open').onclick=()=>openClaim();$('edit-station').onclick=()=>openStation();$('create-open').onclick=openCreate;$('csv').onclick=exportCsv;$('refresh').onclick=reload;
 $('email-settings').onclick=()=>{setupLocked=false;const profile=snapshot.profiles?.find(p=>p.user_id===(demo?demo.user:session.user).id);openModal('Avisos por correo',`<p class="modal-copy">Los avisos van al correo confirmado de tu cuenta al entrar en amarillo, rojo o error de sensor. Se evita enviar un correo por cada lectura.${snapshot.emailConfigured?'':' El envío está pendiente de configurar el proveedor; por ahora no se mandan correos.'}</p><form><label>Correos de atención<select name="enabled"><option value="false">Desactivados</option><option value="true" ${profile?.email_alerts_enabled?'selected':''}>Activados</option></select></label><p class="modal-copy">Para enviar correos se necesita internet y el servidor de monitoreo en funcionamiento. El aviso de desconexión todavía no genera correos.</p><div class="modal-actions"><button class="primary" type="submit">Guardar preferencia</button></div></form>`);bindModal(async fields=>{const enabled=fields.get('enabled')==='true';if(!demo)await api('PATCH',{action:'email-preference',enabled});$('modal').close();await reload();showToast(demo?'Preferencia de ejemplo; no envía correos.':'Preferencia guardada.')})};
-$('demo-start').onclick=()=>{demo=new DemoStore();generation++;loading=false;selected=null;stationDetailOpen=false;view='stations';showApp();void reload()};
+$('demo-start').onclick=async()=>{demo=new DemoStore();const started=demo;demoExit.hidden=true;generation++;loading=false;selected=null;stationDetailOpen=false;view='stations';showApp();await reload();if(demo===started&&!tour.active)tour.start()};
 $('demo-account').onchange=()=>{demo.account=$('demo-account').value;generation++;loading=false;selected=null;stationDetailOpen=false;groups.resetFilters();snapshot=demo.snapshot();view='stations';showApp();void reload()};
 $('signout').onclick=async()=>{await gatewayUI.close();generation++;loading=false;if(demo){demo=null;session=null;showAuth();return}try{const {error}=await supabase.auth.signOut({scope:'local'});if(error)throw error;session=null;showAuth()}catch(_){showToast('No se pudo cerrar la sesión. Inténtalo de nuevo.')}};
 $('auth-form').onsubmit=async event=>{event.preventDefault();if(authBusy||!supabase)return;const form=event.currentTarget;authBusy=true;$('auth-submit').disabled=true;message('auth-status','');const fields=new FormData(form),email=String(fields.get('email')||'').trim(),password=String(fields.get('password')||'');

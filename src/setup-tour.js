@@ -46,7 +46,7 @@ export function installSetupTour(ctx){
   result();
   panel.hidden=false;document.body.classList.add('tour-running');
   highlight=available?(item.form?$('modal-content'):document).querySelector(item.target):document.querySelector('#stations-list');highlight?.classList.add('tour-highlight');highlight?.scrollIntoView({block:'center',behavior:'instant'});
-  $('tour-close').onclick=stop;$('tour-prev').onclick=()=>{index--;show()};$('tour-next').onclick=async()=>{if(index<tourSteps.length-1){index++;show();return}try{await ctx.complete();stop()}catch{ctx.showToast('No se pudo guardar el avance. Puedes volver a consultar el recorrido.')}};
+  $('tour-close').onclick=stop;$('tour-prev').onclick=()=>{index--;show()};$('tour-next').onclick=async()=>{if(index<tourSteps.length-1){index++;show();return}try{await ctx.complete();stop();ctx.afterComplete?.()}catch{ctx.showToast('No se pudo guardar el avance. Puedes volver a consultar el recorrido.')}};
   $('tour-title').focus({preventScroll:true});
  }
  return {start(){active=true;index=0;practice=createTourExample();show()},stop,get active(){return active}};
