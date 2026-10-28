@@ -118,11 +118,14 @@
 @media(prefers-reduced-motion:reduce){.sidebar,.main,.sidebar-toggle,.sidebar-icon-divider,.sidebar-icon-content{transition:none!important}}
 /* A wider illustration uses the left column without expanding the login form. */
 @media(min-width:900px){.story-visual{max-width:100%}.story-visual .wave{height:clamp(70px,16dvh,150px)}}
-.auth-tabs{position:relative;isolation:isolate;border-radius:10px 10px 0 0}
-.auth-tabs::before{content:'';position:absolute;inset:0 auto 0 0;width:50%;background:var(--action-hover-bg);border-bottom:2px solid var(--blue);border-radius:10px 10px 0 0;z-index:-1;transform:translateX(0);transition:transform .2s ease}
+.auth-tabs{position:relative;isolation:isolate;border-radius:0;--auth-tab-fill:#dff3f7;--auth-tab-line:#0085aa}
+.auth-tabs button{border-radius:0}
+.auth-tabs::before{content:'';position:absolute;inset:0 auto 0 0;width:50%;background:var(--auth-tab-fill);border-bottom:2px solid var(--auth-tab-line);border-radius:0;z-index:-1;transform:translateX(0);transition:transform .2s ease}
 .auth-tabs.signup-selected::before{transform:translateX(100%)}
 :root .auth-tabs button.active{background:transparent;border-bottom-color:transparent}
 .demo-banner{flex-wrap:wrap}.demo-banner #demo-exit{margin-left:auto;white-space:normal}
 .demo-finish-actions{flex-wrap:wrap}
 @media(max-width:620px){.demo-banner #demo-exit{width:100%;margin:0}.demo-finish-actions button{width:100%;white-space:normal}}
 @media(prefers-reduced-motion:reduce){.auth-tabs::before{transition:none}}
+/* Square-corner appearance trial; keep branding and connection dots intact. */
+:root :is(button,input,select,dialog,.visual-screen,.visual-chip,.summary>div,.station-card,.gateway-card,.entity-card,.detail,.admin-intro,.inventory,.removed-stations,.empty,.info,.sensor-distance,.detail-sensor,.user-pill,.demo-banner,.status,.node-code,.progress,.progress>div,.tank,.tank-top,.tank-bottom,.code-box,.generated-detail pre,.toast,.setup-tour,.tour-result,.tour-result-card,.tour-highlight){border-radius:0}
