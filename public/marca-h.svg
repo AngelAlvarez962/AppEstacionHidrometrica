@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="64" viewBox="0 0 64 64">
+  <title>Hackeando las inundaciones — Monograma H</title>
+  <style>@media(prefers-color-scheme:dark){.ink{fill:#e3edf7}}</style>
+  <path class="ink" fill="#102d43" d="M8 6H23V26C17 27 12 30 8 34Z"/>
+  <path fill="#078c80" d="M41 6H56V35C50 39 45 33 41 31Z"/>
+  <path fill="#078c80" d="M8 43C13 39 17 36 23 37V58H8Z"/>
+  <path class="ink" fill="#102d43" d="M41 44C47 47 52 46 56 43V58H41Z"/>
+  <path fill="#0085aa" d="M8 37C16 29 22 27 32 33C43 40 47 43 56 36V40C47 47 41 44 30 38C21 33 15 35 8 42Z"/>
+</svg>
