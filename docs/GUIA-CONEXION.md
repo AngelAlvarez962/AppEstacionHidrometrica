@@ -22,3 +22,9 @@ Si agregas una estación a un gateway que ya usa Internet, vuelve a guardar la c
 - **Sin recepción reciente:** una cifra antigua no confirma el nivel actual. Revisa el estado y la hora de la lectura.
 
 Cada cuenta mantiene sus propios equipos. Guardar un gateway no concede acceso a estaciones de otras cuentas. Los avisos de la app acompañan la observación del sitio; antes de interpretar el nivel de un río deben configurarse sus medidas reales.
+
+## Medidas y receptores
+
+Del sensor al fondo vacío: mide desde la cara circular que emite el ultrasonido hasta el fondo. Del fondo al nivel máximo: mide la altura máxima de agua que vigilarás. Por ejemplo, con 60 cm y 25 cm se sugieren aviso a 15 cm y alerta a 20 cm; son editables y no constituyen umbrales validados para un río. Cancelar/configurar después deja el equipo pendiente, sin inventar mediciones.
+
+Registrar otro receptor permite crear uno desde la configuración. Si elegiste estación + gateway al registrar, la app ya creó ambos en tu propia cuenta. En Mis gateways puedes renombrar o eliminar un receptor con confirmación. Para conservar el historial, antes de eliminarlo debes reasignar todas sus estaciones, incluidas las retiradas, a otro receptor de la misma cuenta. Administración permite revisar las cuentas y equipos con el rol ya autorizado; no concede nuevos roles.

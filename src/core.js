@@ -5,7 +5,7 @@ export function calibration(input) {
     if (input[key] === '' || input[key] === null || input[key] === undefined) throw Error('Completa las cuatro medidas.');
     out[key] = Number(input[key]);
   }
-  if (!Object.values(out).every(Number.isFinite) || out.bed_height <= 20 || out.bed_height > 600 || out.capacity_height <= 0 || out.capacity_height > out.bed_height || out.yellow_alert < 0 || out.yellow_alert >= out.red_alert || out.red_alert > out.capacity_height) throw Error('Usa sensor a fondo > 20 y ≤ 600 cm; 0 < fondo a tope ≤ sensor a fondo; amarilla < roja ≤ fondo a tope.');
+  if (!Object.values(out).every(Number.isFinite) || out.bed_height <= 20 || out.bed_height > 600 || out.capacity_height <= 0 || out.capacity_height > out.bed_height || out.yellow_alert < 0 || out.yellow_alert >= out.red_alert || out.red_alert > out.capacity_height) throw Error('Revisa las medidas: el sensor debe estar a más de 20 cm del fondo. El nivel máximo no puede superar esa distancia. El aviso amarillo debe ser menor que la alerta roja y ninguno puede superar el nivel máximo.');
   return out;
 }
 export function sensorDistance(reading, now = Date.now()) {

@@ -196,3 +196,5 @@
  :root .access-demo .access-station{padding:12px}.access-station h2{font-size:16px;margin:8px 0 4px}.access-station .location,.access-station .card-owner{margin-bottom:6px}.access-station .sensor-distance{padding:8px 10px;margin:2px 0 8px}.access-station .sensor-distance strong{font-size:30px}.access-station .card-level strong{font-size:24px}.access-station .progress{margin:8px 0}.access-station footer{padding-top:7px}
  :root #auth-form input:not([type=checkbox]){padding:8px 0}:root #auth-form input:not([type=checkbox]):focus{padding-bottom:7px}:root #auth-form .remember-choice{margin:10px 0}.auth-box .text-button{margin:8px auto}.demo-entry{margin-top:10px;padding-top:8px}
 }
+
+#admin-dashboard .gateway-card{margin-top:18px}#admin-dashboard .toolbar-actions{flex-wrap:wrap}#admin-dashboard h3{overflow-wrap:anywhere}

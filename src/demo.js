@@ -34,6 +34,7 @@ export class DemoStore {
   const data={admin,kits,gateways,stations,archivedStations,readings,profiles:Object.keys(ids).filter(key=>admin||key===this.account).map(key=>({user_id:ids[key],display_name:names[key]})),personalEntities:this.personalEntities.filter(e=>admin||e.owner_id===this.user.id),inventory:admin?this.kits:[]};if(admin){data.adminEntities=this.adminEntities;data.adminAssignments=this.adminAssignments}return structuredClone(data);
  }
  editStation(id,patch){const station=this.allowedStation(id);if(patch.gateway_id){const g=this.gateways.find(g=>g.id===patch.gateway_id);if(!g||(g.kit_id!==station.kit_id&&(!this.stationOwner(station)||this.kits.find(k=>k.id===g.kit_id)?.owner_id!==this.stationOwner(station))))throw Error('Selecciona un gateway de la misma cuenta.');}if(patch.personal_entity_id&&!this.personalEntities.some(e=>e.id===patch.personal_entity_id&&e.owner_id===this.stationOwner(station)))throw Error('La entidad debe pertenecer al propietario de la estación.');Object.assign(station,patch)}
+ deleteGateway(id){if(!this.snapshot().gateways.some(g=>g.id===id))throw Error('No tienes acceso.');if(this.stations.some(s=>s.gateway_id===id))throw Error('Reasigna sus estaciones primero.');this.gateways=this.gateways.filter(g=>g.id!==id)}
  editGateway(id,name){if(!this.snapshot().gateways.some(g=>g.id===id))throw Error('No tienes acceso a ese gateway.');this.gateways.find(g=>g.id===id).name=name}
  deleteStation(id){this.allowedStation(id).deleted_at=new Date().toISOString()}
  restoreStation(id){this.allowedStation(id).deleted_at=null}

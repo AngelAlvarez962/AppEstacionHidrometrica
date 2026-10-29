@@ -1,3 +1,4 @@
+import {suggestedAlerts} from '../src/station-setup.js';
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {calibration,measurement,sensorDistance,validCode} from '../src/core.js';
@@ -56,3 +57,5 @@ test('recordarme persiste sólo por elección y deja de compartir la sesión al 
  assert.equal(first.getItem('auth'),'sesion-recordada');
  first.setRemember(true);first.setItem('auth','nuevo-token');first.removeItem('auth');assert.equal(authStorage(memory(),shared).getItem('auth'),null);
 });
+
+test('alertas propuestas son alturas válidas y no aceptan capacidad vacía',()=>{assert.deepEqual(suggestedAlerts(25),{yellow_alert:15,red_alert:20});assert.equal(suggestedAlerts(''),null);for(const c of [.2,1,16,25,600]){const a=suggestedAlerts(c);assert(a.yellow_alert<a.red_alert&&a.red_alert<=c)}});

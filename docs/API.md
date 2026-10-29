@@ -126,3 +126,7 @@ Todas las acciones de cuenta conservan el JWT y correo confirmado. `POST remembe
 `PATCH station` ahora exige `expected_gateway` igual al gateway actual y `confirm_gateway: true` si se cambia un receptor existente. La escritura incluye una comparación del valor anterior para rechazar cambios concurrentes.
 
 Ingesta directa del equipo: `POST https://<proyecto>.supabase.co/rest/v1/rpc/kit_receive`, con `apikey` pública y cuerpo `p_token`, `p_station_serial`, `p_distance`, `p_status`, `p_packet`, `p_rssi`. La credencial de gateway aleatoria se verifica por SHA256; no es una sesión de usuario. La función sólo escribe estaciones vinculadas activas y configuradas. Los reintentos o duplicados simultáneos USB/Wi-Fi de la misma muestra en 30 s no crean otra fila. `internet_last_seen` se actualiza sólo por esta vía directa; la UI requiere una recepción posterior a `internet_configured_at` para indicar Internet comprobado.
+
+## Eliminar receptor sin estaciones
+
+DELETE /api/kits con action delete-gateway e id llama kit_delete_gateway con JWT del usuario. La migración 009 admite al propietario o a un administrador existente. Rechaza receptores con cualquier estación vinculada (incluidas retiradas), revoca acceso al eliminar las claves asociadas y limpia preferencia y preparación pendiente. No elimina estaciones ni lecturas.
