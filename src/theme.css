@@ -58,3 +58,5 @@ body,.sidebar,.main,.auth-story,.auth-panel,.station-card,.gateway-card,.entity-
 }
 @media(prefers-reduced-motion:reduce){:is(.primary,.secondary,.icon-button,.text-button,.theme-toggle,.station-card,.sidebar nav button,.sidebar-tools button,.sidebar-bottom button,.auth-tabs button){transition:none!important;transform:none!important}}
 @media(prefers-reduced-motion:reduce){.theme-toggle svg,body,.sidebar,.main,.auth-story,.auth-panel,.station-card,.gateway-card,.entity-card,.detail,dialog,.setup-tour,.theme-toggle{transition:none!important;animation:none!important}}
+
+:root[data-theme=dark] .admin-symbol .admin-banner{fill:#152335}

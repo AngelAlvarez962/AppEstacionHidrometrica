@@ -6,7 +6,7 @@ Incluye el logo original de Ideas Disruptivas. La web permite entrar con las cue
 
 ## Agregar equipos
 
-Cada usuario con correo confirmado puede abrir **Agregar equipos → Agregar equipo nuevo**, elegir estación + gateway, solo estación o solo gateway, y configurar sus medidas. Ya no existe la pantalla Preparar kits. Una estación adicional puede usar un gateway propio. El identificador de radio debe coincidir con el transmitido por su LoRa. Los códigos anteriores siguen disponibles como alternativa de compatibilidad.
+Cada usuario con correo confirmado puede abrir **Mis estaciones → Agregar estación** o **Mis gateways → Agregar gateway**. Son registros independientes. Al terminar puede agregar otra estación, otro gateway o cerrar la ventana con **No, terminar**. Las medidas se configuran desde la tarjeta de estación; la conexión USB/Wi-Fi desde Mis gateways. El identificador de radio debe coincidir con el transmitido por su LoRa. No existe la pantalla Preparar kits.
 
 Para recibir medidas se necesita firmware compatible. El registro no reprograma una placa ni detecta cualquier equipo automáticamente. Si se añade una estación a un gateway que ya envía por Internet, volver a guardar su configuración Wi-Fi para actualizar la lista de estaciones.
 

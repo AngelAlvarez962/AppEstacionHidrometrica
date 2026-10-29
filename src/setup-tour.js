@@ -1,7 +1,7 @@
 import {createTourExample,updateTourExample,exampleResultHtml} from './tour-example.js';
 // All practice changes stay in a disposable model, never in an account snapshot.
 export const tourSteps = [
- {view:'stations',target:'#claim-open',title:'Tus equipos',text:'Aquí aparecen tus estaciones. Si todavía no tienes equipos, pulsa Agregar equipos al salir del recorrido y registra tu estación o gateway en tu cuenta.'},
+ {view:'stations',target:'#claim-open',title:'Tus equipos',text:'Aquí aparecen tus estaciones. Si todavía no tienes equipos, pulsa Agregar estación al salir del recorrido. Para registrar un receptor, abre Mis gateways y pulsa Agregar gateway.'},
  {view:'stations',detail:true,target:'#edit-station',title:'Abre tu estación',text:'Selecciona una estación para ver sus medidas e historial. Configurar estación abre sus datos de instalación.'},
  {view:'stations',form:'station',target:'[name="name"]',title:'Nombre, ubicación y receptor',text:'Prueba un nombre y una ubicación. La tarjeta de ejemplo cambia mientras escribes. En la configuración real elegirás un gateway de tu cuenta; aquí no se guardan cambios.'},
  {view:'stations',form:'station',target:'[name="bed_height"]',title:'Introduce las medidas reales',text:'Sensor a fondo: desde la cara del sensor hasta el punto de cero de agua. Fondo a tope: altura que representa el 100%. Usa centímetros; no copies las medidas de otra instalación.'},

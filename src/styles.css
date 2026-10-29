@@ -198,3 +198,6 @@
 }
 
 #admin-dashboard .gateway-card{margin-top:18px}#admin-dashboard .toolbar-actions{flex-wrap:wrap}#admin-dashboard h3{overflow-wrap:anywhere}
+
+.admin-symbol svg{display:block;width:28px;height:28px;fill:none;stroke:currentColor;stroke-width:1.8}.admin-symbol .admin-banner{fill:var(--sidebar-bg,var(--panel,#fff))}.admin-symbol text{fill:currentColor;stroke:none;font-family:system-ui,sans-serif;font-weight:800;font-size:8px}.add-next{display:flex;flex-direction:column;gap:12px}.add-next .text-button{margin:4px auto}
+.sidebar nav button>.admin-symbol{width:36px;vertical-align:middle}

@@ -28,3 +28,7 @@ Cada cuenta mantiene sus propios equipos. Guardar un gateway no concede acceso a
 Del sensor al fondo vacío: mide desde la cara circular que emite el ultrasonido hasta el fondo. Del fondo al nivel máximo: mide la altura máxima de agua que vigilarás. Por ejemplo, con 60 cm y 25 cm se sugieren aviso a 15 cm y alerta a 20 cm; son editables y no constituyen umbrales validados para un río. Cancelar/configurar después deja el equipo pendiente, sin inventar mediciones.
 
 Registrar otro receptor permite crear uno desde la configuración. Si elegiste estación + gateway al registrar, la app ya creó ambos en tu propia cuenta. En Mis gateways puedes renombrar o eliminar un receptor con confirmación. Para conservar el historial, antes de eliminarlo debes reasignar todas sus estaciones, incluidas las retiradas, a otro receptor de la misma cuenta. Administración permite revisar las cuentas y equipos con el rol ya autorizado; no concede nuevos roles.
+
+## Alta por apartado (actualización)
+
+Usa Mis estaciones → Agregar estación o Mis gateways → Agregar gateway. Cada formulario registra únicamente ese tipo de equipo. Después del alta, elige Agregar estación, Agregar gateway o No, terminar. Registrar una estación no crea un receptor automáticamente. Configura las medidas desde la tarjeta y su botón Configurar estación; conecta el receptor desde Mis gateways → Conectar por USB.
