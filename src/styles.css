@@ -258,3 +258,31 @@
  .station-detail-active .chart-area canvas{height:clamp(120px,calc(100dvh - 620px),220px)}
  .station-detail-active .chart-zoom .chart-area canvas{height:420px}
 }
+/* Give the water illustration the full height of the history alongside it. */
+@media(min-width:851px){
+ .station-detail-active .detail-body{grid-template-columns:minmax(240px,.85fr) minmax(0,2fr)}
+ .station-detail-active .water-display{display:flex;flex-direction:column;min-width:0}
+ .station-detail-active .tank{flex:1;min-height:180px;height:auto}
+ .station-detail-active #detail-measures{margin-bottom:0;line-height:1.5}
+ .station-detail-active .chart-zoom .detail-body{grid-template-columns:1fr}
+ .station-detail-active .chart-zoom .tank{flex:none;height:260px}
+}
+.station-detail-active .history-controls{display:grid;grid-template-columns:minmax(140px,1.15fr) repeat(2,minmax(120px,1fr));align-items:end;gap:8px}
+.station-detail-active .history-controls label{min-width:0}
+.station-detail-active .history-controls .animated-select{min-width:0}
+:root .station-detail-active .history-controls :is(.select-trigger,#history-reload,#history-zoom){height:42px;min-height:42px;display:flex;align-items:center;justify-content:center;padding:8px 12px;white-space:normal;line-height:1.25}
+:root .station-detail-active .history-controls .select-trigger{justify-content:space-between}
+@media(max-width:620px){
+ .station-detail-active .history-controls{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .station-detail-active .history-controls label{grid-column:1/-1}
+ .station-detail-active .tank{height:230px}
+}
+@media(min-width:621px) and (max-width:1049px){
+ .station-detail-active .detail-body{grid-template-columns:1fr}
+ .station-detail-active .tank{flex:none;height:230px}
+}
+@media(min-width:1050px) and (max-height:850px){
+ .station-detail-active .chart-area canvas{height:clamp(140px,calc(100dvh - 590px),250px)}
+ .station-detail-active .chart-zoom .chart-area canvas{height:420px}
+}
+.station-detail-active .monitoring-tools{margin-top:4px}
