@@ -286,3 +286,5 @@
  .station-detail-active .chart-zoom .chart-area canvas{height:420px}
 }
 .station-detail-active .monitoring-tools{margin-top:4px}
+
+.telegram-open{display:inline-block;text-decoration:none;margin:12px 0}

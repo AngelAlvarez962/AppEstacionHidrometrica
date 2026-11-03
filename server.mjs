@@ -14,7 +14,7 @@ if(process.platform==='win32'&&!process.env.SUPABASE_SECRET_KEY&&process.env.LOC
   if(ref){try{loadEnvFile(resolve(process.env.LOCALAPPDATA,'EstacionHidrometrica',ref,'.env.local'));}catch(_){/* The app explains missing configuration. */}}
 }
 const vite=production?null:await (await import('vite')).createServer({root,server:{middlewareMode:true},appType:'spa'});
-const handlers={'/api/config':makeHandler('config'),'/api/kits':makeHandler('kits'),'/api/device':makeHandler('device')};
+const handlers={'/api/config':makeHandler('config'),'/api/kits':makeHandler('kits'),'/api/device':makeHandler('device'),'/api/telegram':makeHandler('telegram')};
 const emailTimer=setInterval(()=>void processEmailQueue(),60000);emailTimer.unref();
 export const server=http.createServer(async(req,res)=>{
   const pathname=new URL(req.url,'http://localhost').pathname;
