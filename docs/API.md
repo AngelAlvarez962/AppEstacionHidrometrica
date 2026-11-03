@@ -130,3 +130,6 @@ Ingesta directa del equipo: `POST https://<proyecto>.supabase.co/rest/v1/rpc/kit
 ## Eliminar receptor sin estaciones
 
 DELETE /api/kits con action delete-gateway e id llama kit_delete_gateway con JWT del usuario. La migración 009 admite al propietario o a un administrador existente. Rechaza receptores con cualquier estación vinculada (incluidas retiradas), revoca acceso al eliminar las claves asociadas y limpia preferencia y preparación pendiente. No elimina estaciones ni lecturas.
+
+## Monitoreo y soporte (011)
+POST history: id y hours (1,24,168), hasta 2,000 últimas lecturas, respuesta rows/limited/since. Consulta paginada con JWT/RLS. POST support-list: últimos 100 tickets propios o todos para administrador. POST support-create: station_id propio o null, subject <=120 y description <=3000; límite 10/hora por cuenta confirmada. PATCH support-reply: id, status (open/reviewing/resolved), reply <=3000; sólo admin. POST audit: últimas 100 acciones, sólo admin; registro por triggers sin secretos o texto de tickets.
