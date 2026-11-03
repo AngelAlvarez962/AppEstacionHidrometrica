@@ -216,3 +216,45 @@
 #admin-dashboard .gateway-card h3{color:var(--ink)}
 
 .monitoring-tools,.history-controls{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:20px 0}.history-controls label{margin:0;min-width:150px}.connection-hint{font-size:11px;color:var(--blue);line-height:1.6}.chart-area canvas{height:280px}.chart-zoom .detail-body{grid-template-columns:1fr}.chart-zoom .chart-area canvas{height:420px}.support-card{padding:16px 0;border-bottom:1px solid var(--line);overflow-wrap:anywhere}.support-card p{white-space:pre-wrap}.support-card pre{white-space:pre-wrap;font-size:11px;max-height:200px;overflow:auto}.setup-checklist{padding-left:22px}.setup-checklist li{padding:14px 0;border-bottom:1px solid var(--line)}.setup-checklist p{font-size:12px;color:var(--muted);line-height:1.7}#setup-stations{display:flex;flex-wrap:wrap;gap:8px}textarea{font:inherit;display:block;width:100%;margin-top:8px;padding:12px;border:1px solid var(--line);color:var(--ink);background:transparent;resize:vertical}#history-status{font-size:11px;color:var(--muted);line-height:1.5}
+/* Keep the reading explanation beside the sensor, and fit the default detail
+   on ordinary laptop displays. Small screens and enlarged charts may scroll. */
+.detail-sensor .measurement-guide{margin:0 0 0 auto;max-width:390px;font-size:11px;line-height:1.65;border-left:1px solid var(--line);padding-left:20px}
+.station-detail-active{padding-top:18px;padding-bottom:12px}
+.station-detail-active .detail{margin-top:0;padding:18px}
+.station-detail-active .detail-navigation{margin-bottom:12px;padding-bottom:10px}
+.station-detail-active .detail-heading{padding-bottom:12px}
+.station-detail-active .detail-heading h1{margin:4px 0;font-size:22px}
+.station-detail-active .detail-sensor{margin-top:12px;padding:12px 16px;gap:20px}
+.station-detail-active .detail-body{padding-top:14px;gap:22px}
+.station-detail-active .history-controls{margin:10px 0;gap:8px}
+.station-detail-active .history-controls .animated-select{margin-top:3px}
+.station-detail-active .chart-title h3{margin:0}
+.station-detail-active #history-status{margin:6px 0}
+.station-detail-active #detail-note{margin:6px 0;font-size:10px;line-height:1.5}
+.station-detail-active .monitoring-tools{margin:12px 0 0}
+.station-detail-active .app-footer{padding:8px 0 0}
+#owner-role-info{margin:0 0 16px;color:var(--teal);white-space:normal}
+@media(min-width:1050px) and (max-height:850px){
+ .station-detail-active .chart-area canvas{height:clamp(145px,25dvh,215px)}
+ .station-detail-active .tank{height:120px;margin-top:10px}
+ .station-detail-active .water-reading strong{font-size:30px}
+ .station-detail-active #detail-measures{margin:8px 0;font-size:10px}
+ .station-detail-active .detail-sensor strong{font-size:32px}
+ .station-detail-active .detail-sensor p{font-size:11px}
+ .station-detail-active .chart-zoom .chart-area canvas{height:420px}
+}
+@media(max-width:1100px){.detail-sensor{flex-wrap:wrap}.detail-sensor .measurement-guide{flex-basis:100%;max-width:none;margin:0;border-left:0;border-top:1px solid var(--line);padding:10px 0 0}}
+@media(max-width:620px){.station-detail-active{padding-top:12px}.station-detail-active .detail{padding:12px}.detail-sensor .measurement-guide{width:100%}}
+.station-detail-active .app-footer{display:none}
+.station-detail-active .monitoring-tools{margin:8px 0 0}
+.station-detail-active .detail-navigation{padding-bottom:6px;margin-bottom:8px}
+.station-detail-active .detail-navigation button{padding:8px 12px}
+.station-detail-active .demo-banner{padding:6px 12px;margin-bottom:10px}
+.station-detail-active .demo-banner>div>span{display:none}
+@media(min-width:1050px) and (max-height:850px){.station-detail-active .chart-area canvas{height:clamp(140px,22dvh,190px)}}
+@media(min-width:1050px) and (max-height:850px){
+ .station-detail-active .detail{padding:14px}
+ .station-detail-active .monitoring-tools button{padding:8px 12px}
+ .station-detail-active .chart-area canvas{height:clamp(120px,calc(100dvh - 620px),220px)}
+ .station-detail-active .chart-zoom .chart-area canvas{height:420px}
+}
