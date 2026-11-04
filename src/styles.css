@@ -291,3 +291,40 @@
 .telegram-examples{margin-top:22px;padding-top:18px;border-top:1px solid var(--line)}.telegram-examples h3{font-size:16px;color:var(--ink)}.telegram-message-preview{padding:18px;border:1px solid var(--line);background:var(--panel,#f0f9fc);color:var(--ink);white-space:pre-wrap;overflow-wrap:anywhere;font:inherit;font-size:13px;line-height:1.65}:root[data-theme=dark] .telegram-message-preview{background:#102e3c}
 .telegram-message-preview{border-left:4px solid var(--blue)}.telegram-message-preview[data-kind=yellow]{border-left-color:#e5ad21}.telegram-message-preview[data-kind=red]{border-left-color:#e64f6b}.telegram-message-preview[data-kind=error]{border-left-color:#e69342}.telegram-message-preview[data-kind=normal]{border-left-color:#0bb291}
 .optional-help{margin:12px 0;color:var(--muted);font-size:12px;line-height:1.6}.optional-help summary{cursor:pointer;color:var(--blue);font-weight:650}.optional-help[open] summary{margin-bottom:10px}.optional-help p{overflow-wrap:anywhere}.sensor-details{margin-bottom:0}.link-expiry{display:block;margin-top:8px;color:var(--muted);font-size:11px}
+
+/* Station overview: readable hierarchy, shared light/dark theme, compact secondary data. */
+#stations-list.station-grid{grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:22px;align-items:stretch}
+.station-card.station-card-v2{padding:22px;position:relative;overflow:hidden;border-top:3px solid var(--blue);transition:transform 180ms ease,border-color 180ms ease,box-shadow 180ms ease}
+.station-card-v2[data-state=yellow]{border-top-color:#b67a00}.station-card-v2[data-state=red],.station-card-v2[data-state=error]{border-top-color:#d64163}.station-card-v2:is([data-state=waiting],[data-state=offline],[data-state=uncalibrated]){border-top-color:var(--muted)}
+.station-card-v2:hover{transform:translateY(-3px);box-shadow:0 10px 28px #063b4d12}
+.station-card-v2 .card-top{gap:10px;flex-wrap:wrap;align-items:center}
+.station-card-v2 .status{display:inline-flex;gap:6px;align-items:center;white-space:normal;line-height:1.4}
+.station-card-v2 .status i{font-style:normal;font-size:12px}
+.station-card-v2 .node-code{font-size:10px;letter-spacing:.6px;background:transparent;padding:0;color:var(--muted)}
+.station-card-v2 .station-identity{margin:20px 0 18px;min-height:78px}
+.station-card-v2 .station-identity h2{font-size:21px;line-height:1.25;margin:0 0 7px;letter-spacing:-.5px}
+.station-card-v2 .location{margin:0 0 5px;min-height:0;font-size:12px;line-height:1.5}
+.station-card-v2 .card-owner{margin:0;font-size:11px;color:var(--teal)}
+.station-level-hero{display:flex;align-items:center;justify-content:space-between;gap:18px;padding:18px 0 22px;border-bottom:1px solid var(--line)}
+.station-card-v2 .card-level .calculated-label{font-size:11px;font-weight:650;margin:0 0 7px}
+.station-card-v2 .card-level strong{font-size:48px;line-height:1.05;letter-spacing:-2px;color:var(--ink)}
+.station-card-v2 .card-level span{font-size:14px;margin-left:7px}
+.station-card-v2 .card-level small{font-size:11px;line-height:1.5}
+.card-water-gauge{position:relative;isolation:isolate;flex:0 0 70px;height:100px;border:1px solid var(--line);background:color-mix(in srgb,var(--blue) 7%,transparent);overflow:hidden;display:grid;place-items:center}
+.card-water-fill{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(0deg,var(--blue),#6dcbdf);opacity:.8;z-index:-1}
+.card-water-fill:before{content:'';position:absolute;left:-10%;top:-5px;width:120%;height:10px;border-radius:50%;background:#6dcbdf}
+.card-water-gauge>span{font-size:12px;font-weight:750;color:var(--ink);background:var(--surface,#fff);padding:4px 6px}
+.card-water-gauge.is-empty .card-water-fill{display:none}
+.station-sensor-row{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:17px 0 5px;color:var(--muted);font-size:11px}
+.station-sensor-row strong{font-size:16px;font-variant-numeric:tabular-nums;color:var(--ink)}.station-sensor-row small{font-size:11px;font-weight:400}
+.station-card-v2 .connection-hint{display:flex;align-items:center;gap:6px;font-size:10px;margin:10px 0 18px;line-height:1.5;color:var(--muted)}
+.connection-dot{width:6px;height:6px;flex:none;border-radius:50%;background:var(--muted)}.connection-dot.is-live{background:var(--teal)}
+.station-card-v2 footer{border-color:var(--line);align-items:center;font-size:10px;padding-top:15px;line-height:1.5;flex-wrap:wrap}.station-card-v2 footer b{font-size:11px;white-space:nowrap}
+@media(min-width:1800px){#stations-list.station-grid{grid-template-columns:repeat(auto-fit,minmax(330px,1fr))}}
+@media(max-width:620px){#stations-list.station-grid{gap:16px}.station-card.station-card-v2{padding:20px}.station-card-v2 .station-identity{min-height:0}.station-card-v2 .card-level strong{font-size:44px}}
+@media(prefers-reduced-motion:reduce){.station-card.station-card-v2{transition:none}.station-card-v2:hover{transform:none}}
+:root .station-card.station-card-v2{border-top-color:var(--blue)}
+:root .station-card.station-card-v2[data-state=yellow]{border-top-color:#b67a00}
+:root .station-card.station-card-v2:is([data-state=red],[data-state=error]){border-top-color:#d64163}
+:root .station-card.station-card-v2:is([data-state=waiting],[data-state=offline],[data-state=uncalibrated]){border-top-color:var(--muted)}
+:root .station-card-v2 .card-water-gauge>span{background:#fff;color:#102d43}
