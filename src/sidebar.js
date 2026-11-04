@@ -12,14 +12,19 @@ export function installSidebar(){
   toggle.querySelector('.sidebar-toggle-label').textContent=collapsed?'Mostrar menú':'Ocultar menú';
   requestAnimationFrame(()=>window.dispatchEvent(new Event('resize')));
  };
+ const mobile=window.matchMedia('(max-width:850px)');
+ root.classList.remove('mobile-menu-open');
  let collapsed=false;
  try{collapsed=localStorage.getItem('hi-sidebar-collapsed')==='true'}catch{}
  apply(collapsed);
  toggle.onclick=()=>{
+  if(mobile.matches){const open=root.classList.toggle('mobile-menu-open');toggle.setAttribute('aria-expanded',String(open));toggle.setAttribute('aria-label',open?'Cerrar menú':'Abrir menú');return;} 
   const next=!root.classList.contains('sidebar-collapsed');apply(next);
   try{localStorage.setItem('hi-sidebar-collapsed',String(next))}catch{}
  };
  sidebar.querySelector('.brand').after(toggle);
+ sidebar.querySelectorAll('nav button,.sidebar-tools button').forEach(b=>b.addEventListener('click',()=>{if(mobile.matches){root.classList.remove('mobile-menu-open');toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-label','Abrir menú')}}));
+ const syncMobile=()=>{root.classList.remove('mobile-menu-open');if(mobile.matches){toggle.setAttribute('aria-expanded','false');toggle.setAttribute('aria-label','Abrir menú')}else apply(root.classList.contains('sidebar-collapsed'))};mobile.addEventListener('change',syncMobile);syncMobile();
  sidebar.addEventListener('transitionend',event=>{if(event.target===sidebar&&event.propertyName==='width')window.dispatchEvent(new Event('resize'))});
  sidebar.addEventListener('pointerover',event=>{const button=event.target.closest('nav button');if(button)button.title=button.textContent.trim()});
  for(const button of sidebar.querySelectorAll('.sidebar-tools button,#signout')){

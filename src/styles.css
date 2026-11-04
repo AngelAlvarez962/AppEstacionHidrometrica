@@ -328,3 +328,28 @@
 :root .station-card.station-card-v2:is([data-state=red],[data-state=error]){border-top-color:#d64163}
 :root .station-card.station-card-v2:is([data-state=waiting],[data-state=offline],[data-state=uncalibrated]){border-top-color:var(--muted)}
 :root .station-card-v2 .card-water-gauge>span{background:#fff;color:#102d43}
+/* Compact mobile navigation: preferences are revealed only on demand. */
+@media(max-width:850px){
+ :root .sidebar,:root.sidebar-collapsed .sidebar{position:relative;width:100%;height:auto;min-height:0;padding:14px 16px;display:grid;grid-template-columns:1fr 44px;align-items:center;gap:0 12px}
+ :root .sidebar .brand,:root.sidebar-collapsed .sidebar .brand{display:flex;margin:0;min-height:44px}
+ :root .sidebar .brand img{width:32px;height:36px}
+ :root .sidebar .brand strong{font-size:14px;line-height:1.15}
+ :root .sidebar .brand span{font-size:8px;margin-top:4px}
+ :root .sidebar .sidebar-toggle{position:static;grid-column:2;grid-row:1;width:44px;height:44px;padding:10px;margin:0;justify-content:center}
+ :root .sidebar .sidebar-toggle-label{display:none}
+ :root .sidebar nav,:root.sidebar-collapsed .sidebar nav{grid-column:1/-1;display:flex;flex-wrap:nowrap;overflow-x:auto;justify-content:flex-start;gap:4px;margin:12px 0 0;padding:8px 0 0;border-top:1px solid var(--line);width:100%}
+ :root .sidebar nav button{flex:0 0 auto;white-space:nowrap;padding:10px;font-size:11px;min-height:42px}
+ :root .sidebar nav button>span{display:none}
+ :root .sidebar-bottom,:root.sidebar-collapsed .sidebar-bottom{grid-column:1/-1;display:none;margin:0;padding:12px 0 0;width:100%}
+ :root.mobile-menu-open .sidebar-bottom{display:flex;flex-direction:column;gap:8px;animation:mobile-menu-in 160ms ease-out}
+ :root .sidebar .sidebar-theme{justify-content:space-between;margin:0;padding:8px 10px}
+ :root .sidebar .sidebar-tools{display:flex;flex-direction:column;gap:4px;width:100%}
+ :root .sidebar .sidebar-tools .eyebrow{display:none}
+ :root .sidebar-bottom button{width:100%;min-height:44px;text-align:left;padding:10px}
+ :root .main,:root.sidebar-collapsed .main{margin:0;padding:22px 16px}
+ .topbar{flex-wrap:wrap;gap:12px}.topbar h1{font-size:27px}.topbar-account{margin-left:0}
+ .summary{gap:10px}.summary>div{padding:15px;min-height:100px}.summary small{font-size:10px;line-height:1.4}.summary strong{font-size:27px;margin:8px 0}
+ .modal-actions{flex-wrap:wrap}.watch-runs .modal-actions button{white-space:normal}
+}
+@keyframes mobile-menu-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+@media(prefers-reduced-motion:reduce){:root.mobile-menu-open .sidebar-bottom{animation:none}}
