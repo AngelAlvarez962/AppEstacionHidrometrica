@@ -353,3 +353,47 @@
 }
 @keyframes mobile-menu-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
 @media(prefers-reduced-motion:reduce){:root.mobile-menu-open .sidebar-bottom{animation:none}}
+
+/* Phone layout keeps station data close to the navigation. */
+@media(max-width:620px){
+ :root .sidebar,:root.sidebar-collapsed .sidebar{padding:8px 14px 0}
+ :root .sidebar .brand strong{display:block;max-width:21ch;line-height:1.25}
+ :root .sidebar nav,:root.sidebar-collapsed .sidebar nav{
+  display:grid;grid-auto-flow:column;grid-auto-columns:minmax(0,1fr);
+  gap:4px;margin-top:8px;padding:5px 0 0;overflow:visible;
+ }
+ :root .sidebar nav button{
+  display:flex;align-items:center;justify-content:center;min-width:0;min-height:44px;
+  white-space:normal;text-align:center;font-size:11px;line-height:1.2;padding:6px 3px;
+  border-bottom:2px solid transparent;
+ }
+ :root .sidebar nav button.active{border-bottom-color:var(--blue)}
+ :root .sidebar-bottom,:root.sidebar-collapsed .sidebar-bottom{padding:8px 0 12px}
+ :root .sidebar-bottom .sidebar-tools{margin:0}
+ :root .main,:root.sidebar-collapsed .main{padding:18px 14px 24px}
+ #monitor-header.topbar{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:start;gap:8px;margin-bottom:15px}
+ #monitor-header .eyebrow{font-size:8px;letter-spacing:.9px}
+ #monitor-header h1{font-size:clamp(23px,6vw,29px);margin:5px 0}
+ #monitor-header .topbar-account .user-pill{max-width:100px;margin-top:2px}
+ #equipment-summary.summary{grid-template-columns:repeat(4,minmax(0,1fr));gap:0;border:1px solid var(--line)}
+ #equipment-summary.summary>div{display:flex;flex-direction:column;padding:10px 6px;min-height:0;min-width:0;border:0;text-align:center}
+ #equipment-summary.summary>div+div{border-inline-start:1px solid var(--line)}
+ #equipment-summary strong{order:-1;font-size:23px;line-height:1;margin:0 0 6px}
+ #equipment-summary span{font-size:8px;letter-spacing:.2px;line-height:1.35;overflow-wrap:anywhere}
+ #equipment-summary small{display:none}
+ .main .section-toolbar{align-items:center;margin:12px 0;gap:8px}
+ .main .section-toolbar .equipment-actions{flex-wrap:nowrap}
+ .main .section-toolbar .equipment-actions button{min-width:44px;min-height:44px}
+ #station-overview .filters{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,130px),1fr));gap:8px;margin-bottom:13px}
+ #station-overview .filters label{width:auto;min-width:0}
+ #station-overview .filters #owner-filter-label{order:-1}
+ #station-overview .filters .animated-select{min-width:0}
+ #station-overview .filters .select-trigger{min-height:44px;padding-inline:9px;font-size:11px}
+ .station-card.station-card-v2{padding:16px}
+ .station-card-v2 .station-identity{margin:12px 0 4px}
+ .station-level-hero{padding:12px 0 14px;gap:10px}
+ .card-water-gauge{height:80px;flex-basis:62px}
+ .station-sensor-row{padding-top:12px}
+ .station-card-v2 .connection-hint{margin:7px 0 12px}
+ .station-card-v2 footer{padding-top:10px}
+}

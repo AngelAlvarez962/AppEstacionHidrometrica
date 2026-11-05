@@ -2,7 +2,7 @@ import {stationOwner} from './onboarding.js';
 import {animatedSelect} from './animated-select.js';
 export function installEntities(ctx){
  const {$,escape,openModal,bindModal,api,reload,showToast}=ctx;
- let entityFilter='all',ownerFilter='all';
+ let entityFilter='all',ownerFilter='mine';
  const entityMenu=animatedSelect($('entity-filter'),'Entidad'),ownerMenu=animatedSelect($('owner-filter'),'Usuario');
  const data=()=>ctx.getSnapshot(),demo=()=>ctx.getDemo(),scope=()=>data().admin?'admin':'personal';
  const entities=()=>data().admin?(data().adminEntities||[]):(data().personalEntities||[]).filter(e=>e.owner_id===ctx.getUser()?.id);
@@ -10,7 +10,12 @@ export function installEntities(ctx){
  function ownerName(station){const id=ownerId(station);return data().profiles?.find(p=>p.user_id===id)?.display_name||(id?'Usuario':'Kit sin activar')}
  function entityId(station){return data().admin?(data().adminAssignments||[]).find(a=>a.station_id===station.id)?.entity_id||null:station.personal_entity_id||null}
  function entityLabel(station){return entities().find(e=>e.id===entityId(station))?.name||'Sin entidad'}
- function visibleStations(){return data().stations.filter(s=>(entityFilter==='all'||(entityFilter==='unassigned'?!entityId(s):entityId(s)===entityFilter))&&(!data().admin||ownerFilter==='all'||ownerId(s)===ownerFilter))}
+ function matchesOwner(station){
+  if(!data().admin||ownerFilter==='all')return true;
+  const owner=ownerFilter==='mine'?ctx.getUser()?.id:ownerFilter;
+  return Boolean(owner)&&ownerId(station)===owner;
+ }
+ function visibleStations(){return data().stations.filter(s=>matchesOwner(s)&&(entityFilter==='all'||(entityFilter==='unassigned'?!entityId(s):entityId(s)===entityFilter)))}
  function selectEntity(id){entityFilter=id;ctx.switchView('stations')}
  function entityForm(entity=null){openModal(entity?'Renombra tu entidad':'Crea una entidad',`<p class="modal-copy">${data().admin?'Sólo visible en administración.':'Agrupa tus estaciones por lugar.'}</p><form><label>Nombre<input name="name" required maxlength="120" value="${escape(entity?.name||'')}" placeholder="Nombre de la entidad"></label><div class="modal-actions"><button class="primary" type="submit">${entity?'Guardar nombre':'Crear entidad'}</button></div></form>`);
   bindModal(async fields=>{const name=String(fields.get('name')||'').trim();if(!name)throw Error('Introduce un nombre.');if(demo()){if(entity)demo().renameEntity(scope(),entity.id,name);else demo().createEntity(scope(),name)}else await api(entity?'PATCH':'POST',{action:entity?'entity-rename':'entity-create',scope:scope(),...(entity?{id:entity.id}:{}),name});$('modal').close();await reload();showToast(entity?'Entidad renombrada.':'Entidad creada.')});
@@ -22,16 +27,17 @@ export function installEntities(ctx){
  function personalOptions(station){return '<option value="">Sin entidad</option>'+(data().personalEntities||[]).filter(e=>e.owner_id===ownerId(station)).map(e=>`<option value="${escape(e.id)}" ${station.personal_entity_id===e.id?'selected':''}>${escape(e.name)}</option>`).join('')}
  function render(){
   if(!entities().some(e=>e.id===entityFilter)&&!['all','unassigned'].includes(entityFilter))entityFilter='all';
-  const owners=(data().profiles||[]).filter(p=>data().kits.some(k=>k.owner_id===p.user_id));if(!owners.some(p=>p.user_id===ownerFilter))ownerFilter='all';
+  const owners=(data().profiles||[]).filter(p=>p.user_id!==ctx.getUser()?.id&&data().kits.some(k=>k.owner_id===p.user_id));
+  if(!['mine','all'].includes(ownerFilter)&&!owners.some(p=>p.user_id===ownerFilter))ownerFilter='mine';
   $('entity-filter').innerHTML='<option value="all">Todas las entidades</option><option value="unassigned">Sin entidad</option>'+entities().map(e=>`<option value="${escape(e.id)}">${escape(e.name)}</option>`).join('');$('entity-filter').value=entityFilter;
-  $('owner-filter-label').hidden=!data().admin;$('owner-filter').innerHTML='<option value="all">Todos los usuarios</option>'+owners.map(p=>`<option value="${escape(p.user_id)}">${escape(p.display_name)}</option>`).join('');$('owner-filter').value=ownerFilter;
+  $('owner-filter-label').hidden=!data().admin;$('owner-filter').innerHTML='<option value="mine">Mi cuenta</option><option value="all">Todos los usuarios</option>'+owners.map(p=>`<option value="${escape(p.user_id)}">${escape(p.display_name)}</option>`).join('');$('owner-filter').value=ownerFilter;
   entityMenu.sync();ownerMenu.sync();
   document.querySelector('[data-view=entities]').innerHTML='<span>▱</span>'+(data().admin?'Entidades internas':'Mis entidades');
   $('entities-heading').textContent=data().admin?'Tu organización interna':'Organiza tus estaciones';$('entities-description').textContent=data().admin?'Clasificación interna de estaciones.':'Agrupa tus estaciones por ubicación.';
   $('entities-list').innerHTML=entities().length?entities().map(e=>`<article class="entity-card"><span class="eyebrow">${data().admin?'ORGANIZACIÓN INTERNA':'MI ENTIDAD'}</span><h2>${escape(e.name)}</h2><p>${data().stations.filter(s=>entityId(s)===e.id).length} estaciones</p><div class="toolbar-actions"><button class="secondary" data-entity-view="${escape(e.id)}">Ver estaciones</button><button class="secondary" data-entity-rename="${escape(e.id)}">Renombrar</button><button class="secondary destructive" data-entity-delete="${escape(e.id)}">Eliminar</button></div></article>`).join(''):'<div class="empty"><h2>Crea tu primera entidad</h2><p>Organiza tus estaciones de la forma que te resulte útil.</p></div>';
   $('entities-list').querySelectorAll('[data-entity-view]').forEach(b=>b.onclick=()=>selectEntity(b.dataset.entityView));$('entities-list').querySelectorAll('[data-entity-rename]').forEach(b=>b.onclick=()=>entityForm(entities().find(e=>e.id===b.dataset.entityRename)));$('entities-list').querySelectorAll('[data-entity-delete]').forEach(b=>b.onclick=()=>removeEntity(entities().find(e=>e.id===b.dataset.entityDelete)));
-  const removed=data().archivedStations||[];$('removed-stations').hidden=!removed.length;$('removed-list').innerHTML=removed.map(s=>`<div class="removed-row"><div><strong>${escape(s.name)}</strong><span>${data().admin?escape(ownerName(s)):escape(s.serial)}</span></div><button class="secondary" data-restore="${escape(s.id)}">Restaurar estación</button></div>`).join('');$('removed-list').querySelectorAll('[data-restore]').forEach(b=>b.onclick=()=>restoreStation(b.dataset.restore));$('classify-station').hidden=!data().admin;
+  const removed=(data().archivedStations||[]).filter(matchesOwner);$('removed-stations').hidden=!removed.length;$('removed-list').innerHTML=removed.map(s=>`<div class="removed-row"><div><strong>${escape(s.name)}</strong><span>${data().admin?escape(ownerName(s)):escape(s.serial)}</span></div><button class="secondary" data-restore="${escape(s.id)}">Restaurar estación</button></div>`).join('');$('removed-list').querySelectorAll('[data-restore]').forEach(b=>b.onclick=()=>restoreStation(b.dataset.restore));$('classify-station').hidden=!data().admin;
  }
  $('entity-filter').onchange=()=>{entityFilter=$('entity-filter').value;ctx.render()};$('owner-filter').onchange=()=>{ownerFilter=$('owner-filter').value;ctx.render()};$('entity-create').onclick=()=>entityForm();$('remove-station').onclick=removeStation;$('classify-station').onclick=classify;
- return {entityForm,render,visibleStations,ownerName,entityLabel,personalOptions,resetFilters(){entityFilter='all';ownerFilter='all'}};
+ return {entityForm,render,visibleStations,getOwnerFilter:()=>ownerFilter,ownerName,entityLabel,personalOptions,resetFilters(){entityFilter='all';ownerFilter='mine'}};
 }
