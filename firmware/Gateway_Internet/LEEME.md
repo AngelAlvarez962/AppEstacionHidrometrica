@@ -13,6 +13,8 @@ En la app: Mis gateways → Conectar por USB → Guardar gateway → Configurar 
 - **SENSOR SIN MEDIDA**: la estación respondió e informó un error del sensor. La pantalla indica el error en lugar de mostrar una distancia.
 - **Distancia en cm**: mide desde el sensor hasta la superficie. La web calcula el nivel del agua usando las medidas de la instalación.
 
+Si la OLED indica **WiFi OK | Web ...** de forma persistente, abre el monitor serie a 115200. El mensaje `HI:` indica si el reloj se sincronizó (`clock_ok`) y el resultado de la comprobación HTTPS (`web_result`). Si el servidor rechazó la credencial del receptor, vuelve a guardar la red desde **Mis gateways → Conectar por USB → Configurar Wi-Fi**. Cierra el monitor serie antes de abrir el USB desde la app.
+
 Radio conservada: 915 MHz, SF7, BW125 kHz, CR4/5, sincronía 0x12 y CRC. SPI 5/19/27, CS18, RST14, DIO0 26; OLED SDA4/SCL15/RST16; VEXT21 activo bajo.
 
 La configuración se conserva en NVS con Preferences. Una sola escritura guarda red, credencial y estaciones. La prueba de confirmación por USB permite activar la nueva credencial en el servidor; si no se confirma, la anterior no se revoca. Nunca se imprime la contraseña ni el token en Serial.

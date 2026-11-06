@@ -23,6 +23,7 @@ QueueHandle_t readings;
 String storedConfig,command,hardware;
 bool pantalla=false,discardCommand=false;
 volatile uint32_t revision=0,lastCloud=0,lastCloudReading=0;
+volatile int lastWebResult=0;
 constexpr uint32_t WEB_CHECK_MS=30000, WEB_FRESH_MS=90000, RADIO_FRESH_MS=15000;
 
 struct Sample { char node[33]; float distance; char status[16]; uint32_t packet; int rssi; uint32_t received; };
@@ -35,7 +36,7 @@ bool webReady(){
 }
 void emit(JsonDocument& doc){xSemaphoreTake(serialMutex,portMAX_DELAY);Serial.print("HI:");serializeJson(doc,Serial);Serial.println();xSemaphoreGive(serialMutex);}
 String configCopy(){xSemaphoreTake(cfgMutex,portMAX_DELAY);String copy=storedConfig;xSemaphoreGive(cfgMutex);return copy;}
-void hello(){JsonDocument doc;doc["type"]="hello";doc["protocol"]=1;doc["hardware"]=hardware;doc["configured"]=configCopy().length()>0;doc["internet_ok"]=webReady();doc["wifi_ok"]=WiFi.status()==WL_CONNECTED;const uint32_t received=lastCloudReading;doc["reading_ok"]=webReady() && received && millis()-received<WEB_FRESH_MS;emit(doc);}
+void hello(){JsonDocument doc;doc["type"]="hello";doc["protocol"]=1;doc["hardware"]=hardware;doc["configured"]=configCopy().length()>0;doc["internet_ok"]=webReady();doc["wifi_ok"]=WiFi.status()==WL_CONNECTED;doc["clock_ok"]=time(nullptr)>=1700000000;doc["web_result"]=lastWebResult;const uint32_t received=lastCloudReading;doc["reading_ok"]=webReady() && received && millis()-received<WEB_FRESH_MS;emit(doc);}
 String sha256(const String& input){unsigned char bytes[32];mbedtls_sha256((const unsigned char*)input.c_str(),input.length(),bytes,0);char hex[65];for(int i=0;i<32;i++)sprintf(hex+i*2,"%02x",bytes[i]);hex[64]=0;return String(hex);}
 bool identifier(const String& s){if(s.length()<1||s.length()>32)return false;for(char c:s)if(!isalnum((unsigned char)c)&&c!='_'&&c!='-')return false;return true;}
 bool hexText(const String& s,int size){if(s.length()!=size)return false;for(char c:s)if(!isxdigit((unsigned char)c))return false;return true;}
@@ -55,37 +56,40 @@ void commandLine(){
 }
 
 // Both the connectivity check and readings use the gateway credential.
-bool postToProject(const JsonDocument& config,const char* action,const JsonDocument& body){
+int postToProject(const JsonDocument& config,const char* action,const JsonDocument& body){
  NetworkClientSecure client;
  client.setCACert(ROOT_CA);
  client.setHandshakeTimeout(5);
  HTTPClient http;
  http.setConnectTimeout(4000);
  http.setTimeout(5000);
- if(!http.begin(client,String(PROJECT_URL)+"/rest/v1/rpc/"+action))return false;
+ if(!http.begin(client,String(PROJECT_URL)+"/rest/v1/rpc/"+action))return HTTPC_ERROR_CONNECTION_REFUSED;
  http.addHeader("apikey",config["key"].as<String>());
  http.addHeader("Content-Type","application/json");
  String json;
  serializeJson(body,json);
  const int result=http.POST(json);
  http.end();
- return result>=200 && result<300;
+ return result;
 }
+
+bool requestSucceeded(int code){return code>=200 && code<300;}
 
 void internetTask(void*){
  JsonDocument cfg;uint32_t loaded=UINT32_MAX,attempt=0,lastPing=0;bool wifiStarted=false;
  for(;;){
   const uint32_t requestedRevision=revision;
-  if(loaded!=requestedRevision){String raw=configCopy();cfg.clear();deserializeJson(cfg,raw);loaded=requestedRevision;WiFi.disconnect(false,false);wifiStarted=false;lastCloud=0;lastCloudReading=0;lastPing=0;}
+  if(loaded!=requestedRevision){String raw=configCopy();cfg.clear();deserializeJson(cfg,raw);loaded=requestedRevision;WiFi.disconnect(false,false);wifiStarted=false;lastCloud=0;lastCloudReading=0;lastPing=0;lastWebResult=0;}
   if(!cfg["ssid"].is<const char*>()){vTaskDelay(pdMS_TO_TICKS(200));continue;}
   if(!wifiStarted||WiFi.status()!=WL_CONNECTED&&millis()-attempt>30000){WiFi.mode(WIFI_STA);WiFi.setAutoReconnect(true);WiFi.begin(cfg["ssid"].as<const char*>(),cfg["password"].as<const char*>());wifiStarted=true;attempt=millis();configTime(0,0,"time.cloudflare.com","pool.ntp.org");}
   const bool wifiConnected=WiFi.status()==WL_CONNECTED;
-  if(!wifiConnected){lastCloud=0;lastCloudReading=0;lastPing=0;}
+  if(!wifiConnected){lastCloud=0;lastCloudReading=0;lastPing=0;lastWebResult=0;}
   if(wifiConnected && time(nullptr)>=1700000000 && (!lastPing || millis()-lastPing>=WEB_CHECK_MS)){
    lastPing=millis();
    JsonDocument ping;
    ping["p_token"]=cfg["token"];
-   if(postToProject(cfg,"kit_gateway_ping",ping))lastCloud=millis();
+   lastWebResult=postToProject(cfg,"kit_gateway_ping",ping);
+   if(requestSucceeded(lastWebResult))lastCloud=millis();
   }
   Sample sample;if(xQueueReceive(readings,&sample,pdMS_TO_TICKS(100))!=pdTRUE)continue;
   // No replay of stale data after an outage. Radio reception never waits for HTTPS.
@@ -99,7 +103,7 @@ void internetTask(void*){
   body["p_status"]=sample.status;
   body["p_packet"]=sample.packet;
   body["p_rssi"]=sample.rssi;
-  if(postToProject(cfg,"kit_receive",body))lastCloud=lastCloudReading=millis();
+  if(requestSucceeded(postToProject(cfg,"kit_receive",body)))lastCloud=lastCloudReading=millis();
  }
 }
 bool parseSample(char* data,Sample& sample){
