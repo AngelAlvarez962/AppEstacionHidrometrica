@@ -25,7 +25,7 @@ test('vinculación durable, confirmación, aislamiento y entrada de Internet con
  const hash=t=>createHash('sha256').update(t).digest('hex');
  try{
   await db.exec(`create role anon;create role authenticated;create role service_role bypassrls;create schema auth;create table auth.users(id uuid primary key,email_confirmed_at timestamptz,email text,raw_user_meta_data jsonb);create function auth.uid() returns uuid language sql stable as $$select nullif(current_setting('request.jwt.claim.sub',true),'')::uuid$$;grant usage on schema auth to authenticated;grant execute on function auth.uid() to authenticated;`);
-  for(const file of ['001-kits.sql','002-entities-and-admin.sql','003-flexible-kits.sql','004-email-alerts.sql','005-serialize-ingestion.sql','006-gateway-connection.sql','007-gateway-switch.sql'])await db.exec(fs.readFileSync(new URL('../supabase/'+file,import.meta.url),'utf8'));
+  for(const file of ['001-kits.sql','002-entities-and-admin.sql','003-flexible-kits.sql','004-email-alerts.sql','005-serialize-ingestion.sql','006-gateway-connection.sql','007-gateway-switch.sql','017-gateway-heartbeat.sql'])await db.exec(fs.readFileSync(new URL('../supabase/'+file,import.meta.url),'utf8'));
   for(const id of [a,b])await db.query('insert into auth.users(id,email,email_confirmed_at) values($1,$2,now())',[id,id+'@example.invalid']);
   await db.query('insert into public.kit_admins values($1)',[a]);let seq=0;
   async function kit(owner){seq++;const token='GW_'+String(seq).repeat(64),code=String(seq+4).repeat(64);const k=(await db.query('select public.kit_prepare($1,\'complete\',$2,$3,$4,$5,$6) as k',[a,'KIT-'+seq,'GW-'+seq,code,hash(token),'EST-'+String(seq).repeat(16)])).rows[0].k;await db.query('select public.kit_claim($1,$2)',[owner,code]);await db.query('update public.kit_stations set bed_height=100,capacity_height=40,yellow_alert=30,red_alert=38 where id=$1',[k.stations[0].id]);return {...k,token}}
@@ -43,6 +43,16 @@ test('vinculación durable, confirmación, aislamiento y entrada de Internet con
   const snapshot=(await db.query('select public.kit_snapshot() as data')).rows[0].data;assert.equal(snapshot.profiles.find(p=>p.user_id===a).preferred_gateway_id,second.gateway.id);
   await assert.rejects(db.query('select * from public.kit_gateway_pending'),/permission denied/);
   await as('','anon');
+  const ping=(token=first.token)=>db.query('select public.kit_gateway_ping($1)',[token]);
+  await assert.rejects(ping('GW_'+'a'.repeat(64)),/DEVICE_NOT_ALLOWED/);
+  await ping();
+  await db.exec('reset role');
+  const gateways=(await db.query('select id,last_seen,internet_last_seen from public.kit_gateways')).rows;
+  assert(gateways.find(g=>g.id===first.gateway.id).last_seen);
+  assert(gateways.find(g=>g.id===first.gateway.id).internet_last_seen);
+  assert(gateways.filter(g=>g.id!==first.gateway.id).every(g=>!g.internet_last_seen));
+  assert.equal((await db.query('select count(*)::int as count from public.kit_readings')).rows[0].count,0);
+  await as('','anon');
   const receive=(token=first.token,serial=first.stations[0].serial)=>db.query("select public.kit_receive($1,$2,68.5,'OK',17,-63) as id",[token,serial]);
   const id=(await receive()).rows[0].id;assert.equal((await receive()).rows[0].id,id);
   await assert.rejects(receive('GW_'+'a'.repeat(64)),/DEVICE_NOT_ALLOWED/);await assert.rejects(receive(first.token,foreign.stations[0].serial),/DEVICE_NOT_ALLOWED/);
@@ -56,6 +66,7 @@ test('vinculación durable, confirmación, aislamiento y entrada de Internet con
   await assert.rejects(db.query('select public.kit_finish_gateway($1,$2,$3)',[b,pending.ticket,proof]),/SETUP_EXPIRED/);
   await assert.rejects(db.query('select public.kit_finish_gateway($1,$2,$3)',[a,pending.ticket,'0'.repeat(64)]),/SETUP_EXPIRED/);
   await receive();await db.query('select public.kit_finish_gateway($1,$2,$3)',[a,pending.ticket,proof]);
+  await assert.rejects(ping(),/DEVICE_NOT_ALLOWED/);await ping(newToken);
   await assert.rejects(receive(),/DEVICE_NOT_ALLOWED/);await receive(newToken);
   await assert.rejects(db.query('select public.kit_finish_gateway($1,$2,$3)',[a,pending.ticket,proof]),/SETUP_EXPIRED/);
  }finally{await db.close()}

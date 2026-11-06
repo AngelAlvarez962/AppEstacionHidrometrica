@@ -4,7 +4,14 @@ Preparación inicial: Arduino IDE con ESP32 **3.3.12**, placa **Heltec WiFi LoRa
 
 Cargar `Gateway_Internet.ino` sin borrar toda la memoria. Antes de reemplazar un gateway en funcionamiento, respaldar y verificar su firmware. No cargar este programa en la estación del sensor.
 
-Después, desde la app 0.3.0: Mis gateways → Conectar por USB → Guardar gateway → Configurar Wi-Fi. Se admiten hasta ocho estaciones con nombres de radio diferentes, ya vinculadas y configuradas en la cuenta. Si se agrega o cambia una estación, vuelve a guardar el Wi-Fi para actualizar esa lista en el receptor.
+En la app: Mis gateways → Conectar por USB → Guardar gateway → Configurar Wi-Fi. Se admiten hasta ocho estaciones con nombres de radio diferentes, ya vinculadas y configuradas en la cuenta. Si se agrega o cambia una estación, vuelve a guardar el Wi-Fi para actualizar esa lista en el receptor.
+
+## Qué indica la pantalla
+
+- **WiFi OK | Web OK**: el servidor de la app respondió al gateway. La comprobación se repite cada 30 segundos, incluso sin lecturas.
+- **ESTACION SIN SENAL**: el gateway lleva al menos 15 segundos sin recibir una trama válida, o todavía espera la primera. Revisa que la estación esté encendida y al alcance.
+- **SENSOR SIN MEDIDA**: la estación respondió e informó un error del sensor. La pantalla indica el error en lugar de mostrar una distancia.
+- **Distancia en cm**: mide desde el sensor hasta la superficie. La web calcula el nivel del agua usando las medidas de la instalación.
 
 Radio conservada: 915 MHz, SF7, BW125 kHz, CR4/5, sincronía 0x12 y CRC. SPI 5/19/27, CS18, RST14, DIO0 26; OLED SDA4/SCL15/RST16; VEXT21 activo bajo.
 

@@ -22,14 +22,20 @@ SemaphoreHandle_t cfgMutex,serialMutex;
 QueueHandle_t readings;
 String storedConfig,command,hardware;
 bool pantalla=false,discardCommand=false;
-volatile uint32_t revision=0,lastCloud=0;
+volatile uint32_t revision=0,lastCloud=0,lastCloudReading=0;
+constexpr uint32_t WEB_CHECK_MS=30000, WEB_FRESH_MS=90000, RADIO_FRESH_MS=15000;
+
+bool webReady(){
+ const uint32_t confirmed=lastCloud;
+ return WiFi.status()==WL_CONNECTED && confirmed && millis()-confirmed<WEB_FRESH_MS;
+}
 struct Sample { char node[33]; float distance; char status[16]; uint32_t packet; int rssi; uint32_t received; };
 Sample latestSample{};
 bool hasSample=false;
 
 void emit(JsonDocument& doc){xSemaphoreTake(serialMutex,portMAX_DELAY);Serial.print("HI:");serializeJson(doc,Serial);Serial.println();xSemaphoreGive(serialMutex);}
 String configCopy(){xSemaphoreTake(cfgMutex,portMAX_DELAY);String copy=storedConfig;xSemaphoreGive(cfgMutex);return copy;}
-void hello(){JsonDocument doc;doc["type"]="hello";doc["protocol"]=1;doc["hardware"]=hardware;doc["configured"]=configCopy().length()>0;doc["internet_ok"]=lastCloud&&millis()-lastCloud<15000;emit(doc);}
+void hello(){JsonDocument doc;doc["type"]="hello";doc["protocol"]=1;doc["hardware"]=hardware;doc["configured"]=configCopy().length()>0;doc["internet_ok"]=webReady();doc["wifi_ok"]=WiFi.status()==WL_CONNECTED;const uint32_t received=lastCloudReading;doc["reading_ok"]=webReady() && received && millis()-received<WEB_FRESH_MS;emit(doc);}
 String sha256(const String& input){unsigned char bytes[32];mbedtls_sha256((const unsigned char*)input.c_str(),input.length(),bytes,0);char hex[65];for(int i=0;i<32;i++)sprintf(hex+i*2,"%02x",bytes[i]);hex[64]=0;return String(hex);}
 bool identifier(const String& s){if(s.length()<1||s.length()>32)return false;for(char c:s)if(!isalnum((unsigned char)c)&&c!='_'&&c!='-')return false;return true;}
 bool hexText(const String& s,int size){if(s.length()!=size)return false;for(char c:s)if(!isxdigit((unsigned char)c))return false;return true;}
@@ -48,24 +54,52 @@ void commandLine(){
  JsonDocument reply;reply["type"]="saved";reply["proof"]=sha256(token+":"+nonce);emit(reply);hello();
 }
 
+// Both the connectivity check and readings use the gateway credential.
+bool postToProject(const JsonDocument& config,const char* action,const JsonDocument& body){
+ NetworkClientSecure client;
+ client.setCACert(ROOT_CA);
+ client.setHandshakeTimeout(5);
+ HTTPClient http;
+ http.setConnectTimeout(4000);
+ http.setTimeout(5000);
+ if(!http.begin(client,String(PROJECT_URL)+"/rest/v1/rpc/"+action))return false;
+ http.addHeader("apikey",config["key"].as<String>());
+ http.addHeader("Content-Type","application/json");
+ String json;
+ serializeJson(body,json);
+ const int result=http.POST(json);
+ http.end();
+ return result>=200 && result<300;
+}
+
 void internetTask(void*){
- JsonDocument cfg;uint32_t loaded=UINT32_MAX,attempt=0;bool wifiStarted=false;
+ JsonDocument cfg;uint32_t loaded=UINT32_MAX,attempt=0,lastPing=0;bool wifiStarted=false;
  for(;;){
-  if(loaded!=revision){String raw=configCopy();cfg.clear();deserializeJson(cfg,raw);loaded=revision;WiFi.disconnect(false,false);wifiStarted=false;}
+  const uint32_t requestedRevision=revision;
+  if(loaded!=requestedRevision){String raw=configCopy();cfg.clear();deserializeJson(cfg,raw);loaded=requestedRevision;WiFi.disconnect(false,false);wifiStarted=false;lastCloud=0;lastCloudReading=0;lastPing=0;}
   if(!cfg["ssid"].is<const char*>()){vTaskDelay(pdMS_TO_TICKS(200));continue;}
   if(!wifiStarted||WiFi.status()!=WL_CONNECTED&&millis()-attempt>30000){WiFi.mode(WIFI_STA);WiFi.setAutoReconnect(true);WiFi.begin(cfg["ssid"].as<const char*>(),cfg["password"].as<const char*>());wifiStarted=true;attempt=millis();configTime(0,0,"time.cloudflare.com","pool.ntp.org");}
+  const bool wifiConnected=WiFi.status()==WL_CONNECTED;
+  if(!wifiConnected){lastCloud=0;lastCloudReading=0;lastPing=0;}
+  if(wifiConnected && time(nullptr)>=1700000000 && (!lastPing || millis()-lastPing>=WEB_CHECK_MS)){
+   lastPing=millis();
+   JsonDocument ping;
+   ping["p_token"]=cfg["token"];
+   if(postToProject(cfg,"kit_gateway_ping",ping))lastCloud=millis();
+  }
   Sample sample;if(xQueueReceive(readings,&sample,pdMS_TO_TICKS(100))!=pdTRUE)continue;
   // No replay of stale data after an outage. Radio reception never waits for HTTPS.
   if(WiFi.status()!=WL_CONNECTED||time(nullptr)<1700000000||millis()-sample.received>15000)continue;
   String serial;for(JsonObject item:cfg["mapping"].as<JsonArray>())if(String(item["node"].as<const char*>())==sample.node){serial=item["serial"].as<String>();break;}
   if(!serial.length())continue;
-  NetworkClientSecure client;client.setCACert(ROOT_CA);client.setHandshakeTimeout(5);
-  HTTPClient http;http.setConnectTimeout(4000);http.setTimeout(5000);
-  if(!http.begin(client,String(PROJECT_URL)+"/rest/v1/rpc/kit_receive"))continue;
-  http.addHeader("apikey",cfg["key"].as<String>());http.addHeader("Content-Type","application/json");
-  JsonDocument body;body["p_token"]=cfg["token"];body["p_station_serial"]=serial;body["p_distance"]=sample.distance;body["p_status"]=sample.status;body["p_packet"]=sample.packet;body["p_rssi"]=sample.rssi;
-  String json;serializeJson(body,json);int result=http.POST(json);http.end();
-  if(result>=200&&result<300)lastCloud=millis();
+  JsonDocument body;
+  body["p_token"]=cfg["token"];
+  body["p_station_serial"]=serial;
+  body["p_distance"]=sample.distance;
+  body["p_status"]=sample.status;
+  body["p_packet"]=sample.packet;
+  body["p_rssi"]=sample.rssi;
+  if(postToProject(cfg,"kit_receive",body))lastCloud=lastCloudReading=millis();
  }
 }
 bool parseSample(char* data,Sample& sample){
@@ -97,15 +131,45 @@ void loop(){
  }
  static uint32_t lastHello=0,lastDisplay=0;if(millis()-lastHello>5000){lastHello=millis();hello();}
  if(pantalla&&millis()-lastDisplay>500){
-  lastDisplay=millis();display.clearDisplay();display.setTextSize(1);display.setTextColor(WHITE);display.setCursor(0,0);display.println("GATEWAY TACOTALPA");
-  if(hasSample&&millis()-latestSample.received<15000){
-   display.setCursor(0,12);display.print(String(latestSample.node).substring(0,13));display.print(" DIST.");
-   display.setTextSize(2);display.setCursor(0,24);display.print(latestSample.distance,1);display.print(" cm");
-   display.setTextSize(1);display.setCursor(0,44);display.print(latestSample.status);display.print(" RSSI ");display.print(latestSample.rssi);
+  lastDisplay=millis();
+  display.clearDisplay();
+  display.setTextSize(1);
+  display.setTextColor(WHITE);
+  display.setCursor(0,0);
+  display.print("MEDICIONES LoRa");
+  display.drawFastHLine(0,10,128,WHITE);
+
+  if(!hasSample || millis()-latestSample.received>=RADIO_FRESH_MS){
+   display.setCursor(0,17);
+   display.println("ESTACION SIN SENAL");
+   display.setCursor(0,34);
+   display.println("Esperando sensor");
   }else{
-   display.setCursor(0,16);display.println("Sin radio reciente");display.println("Esperando estacion");
+   display.setCursor(0,14);
+   display.print(String(latestSample.node).substring(0,14));
+   if(strcmp(latestSample.status,"OK")==0){
+    display.setTextSize(2);
+    display.setCursor(0,25);
+    display.print(latestSample.distance,1);
+    display.print(" cm");
+    display.setTextSize(1);
+    display.setCursor(0,44);
+    display.print("Distancia  RSSI ");
+    display.print(latestSample.rssi);
+   }else{
+    display.setCursor(0,28);
+    display.println("SENSOR SIN MEDIDA");
+    display.setCursor(0,43);
+    display.print(latestSample.status);
+   }
   }
-  display.setTextSize(1);display.setCursor(0,56);display.print(WiFi.status()==WL_CONNECTED?"WiFi OK ":"Sin WiFi ");display.print(lastCloud&&millis()-lastCloud<90000?"Nube OK":"Nube ...");display.display();
+  display.setTextSize(1);
+  display.setCursor(0,56);
+  if(webReady())display.print("WiFi OK | Web OK");
+  else if(WiFi.status()==WL_CONNECTED)display.print("WiFi OK | Web ...");
+  else if(storedConfig.length())display.print("Conectando WiFi...");
+  else display.print("Configurar WiFi USB");
+  display.display();
  }
  delay(2);
 }
