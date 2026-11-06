@@ -30,6 +30,8 @@ bool webReady(){
  return WiFi.status()==WL_CONNECTED && confirmed && millis()-confirmed<WEB_FRESH_MS;
 }
 struct Sample { char node[33]; float distance; char status[16]; uint32_t packet; int rssi; uint32_t received; };
+// Declare this after Sample so the Arduino preprocessor does not generate an early prototype.
+bool parseSample(char* data, Sample& sample);
 Sample latestSample{};
 bool hasSample=false;
 
