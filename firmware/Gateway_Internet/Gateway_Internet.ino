@@ -25,16 +25,14 @@ bool pantalla=false,discardCommand=false;
 volatile uint32_t revision=0,lastCloud=0,lastCloudReading=0;
 constexpr uint32_t WEB_CHECK_MS=30000, WEB_FRESH_MS=90000, RADIO_FRESH_MS=15000;
 
+struct Sample { char node[33]; float distance; char status[16]; uint32_t packet; int rssi; uint32_t received; };
+Sample latestSample{};
+bool hasSample=false;
+
 bool webReady(){
  const uint32_t confirmed=lastCloud;
  return WiFi.status()==WL_CONNECTED && confirmed && millis()-confirmed<WEB_FRESH_MS;
 }
-struct Sample { char node[33]; float distance; char status[16]; uint32_t packet; int rssi; uint32_t received; };
-// Declare this after Sample so the Arduino preprocessor does not generate an early prototype.
-bool parseSample(char* data, Sample& sample);
-Sample latestSample{};
-bool hasSample=false;
-
 void emit(JsonDocument& doc){xSemaphoreTake(serialMutex,portMAX_DELAY);Serial.print("HI:");serializeJson(doc,Serial);Serial.println();xSemaphoreGive(serialMutex);}
 String configCopy(){xSemaphoreTake(cfgMutex,portMAX_DELAY);String copy=storedConfig;xSemaphoreGive(cfgMutex);return copy;}
 void hello(){JsonDocument doc;doc["type"]="hello";doc["protocol"]=1;doc["hardware"]=hardware;doc["configured"]=configCopy().length()>0;doc["internet_ok"]=webReady();doc["wifi_ok"]=WiFi.status()==WL_CONNECTED;const uint32_t received=lastCloudReading;doc["reading_ok"]=webReady() && received && millis()-received<WEB_FRESH_MS;emit(doc);}
