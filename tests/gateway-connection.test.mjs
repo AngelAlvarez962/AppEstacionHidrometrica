@@ -55,6 +55,8 @@ test('vinculación durable, confirmación, aislamiento y entrada de Internet con
   await as('','anon');
   const receive=(token=first.token,serial=first.stations[0].serial)=>db.query("select public.kit_receive($1,$2,68.5,'OK',17,-63) as id",[token,serial]);
   const id=(await receive()).rows[0].id;assert.equal((await receive()).rows[0].id,id);
+  const other=(await receive(first.token,second.stations[0].serial)).rows[0].id;
+  assert.notEqual(other,id);
   await assert.rejects(receive('GW_'+'a'.repeat(64)),/DEVICE_NOT_ALLOWED/);await assert.rejects(receive(first.token,foreign.stations[0].serial),/DEVICE_NOT_ALLOWED/);
   await assert.rejects(db.query('select * from public.kit_readings'),/permission denied/);
   await assert.rejects(db.query("select public.kit_ingest($1,$2,68,'OK',17,-63)",[hash(first.token),first.stations[0].serial]),/permission denied/);

@@ -1,5 +1,6 @@
 import {GatewaySerial,gatewayChange} from './gateway.js';
 import {displayId} from './onboarding.js';
+import gatewaySetupScript from '../firmware/Gateway_Internet/Configurar-Gateway.ps1?url&no-inline';
 export function installGatewayUI(ctx){
  const {$,escape,api,openModal,bindModal,reload,showToast}=ctx;
  let usb=null,selected=null,hello=null,recognized=false,remembered=false,lease=null,pending=null,busy=false,identificationTimer=null,lastPost=0,account=null,guideShown=false,step=0;
@@ -96,8 +97,24 @@ export function installGatewayUI(ctx){
  function openWifi(){if(!hello||!remembered)return;openModal('Guarda el Wi-Fi en el gateway',`<p class="modal-copy">Usa una red de 2.4 GHz con Internet. La contraseña se envía sólo al equipo conectado por USB. Al guardarla podrás alimentar el gateway con su cargador.</p><form><label>Nombre de red (Wi-Fi)<input name="ssid" required maxlength="32" autocomplete="off"></label><label>Contraseña del Wi-Fi<input name="password" type="password" minlength="8" maxlength="63" required autocomplete="new-password"></label><div class="modal-actions"><button type="submit" class="primary">Guardar en el gateway</button></div></form><p id="usb-status" role="status"></p>`);
   bindModal(async fields=>{if(!usb||!hello)throw Error('Vuelve a conectar el gateway.');if(pending)throw Error('Espera la confirmación del gateway antes de volver a guardar.');const ssid=String(fields.get('ssid')),password=String(fields.get('password'));if(new TextEncoder().encode(ssid).length>32)throw Error('El nombre de red supera los 32 bytes.');const configuration=await api('POST',{action:'gateway-prepare',id:selected,hardware:hello.hardware});pending={ticket:configuration.ticket};await usb.send({cmd:'configure',ssid,password,...configuration});$('modal-content').querySelector('form').reset();hello.configured=true;status('Esperando confirmación del gateway. No retires el USB todavía.');setTimeout(()=>{if(pending?.ticket===configuration.ticket){pending=null;status('El gateway no confirmó el guardado. Vuelve a conectar el USB y repite el paso.',true)}},15000);});
  }
+
+ function openCode(id){
+  if(!ownGateways().some(g=>g.id===id)||demo())return;
+  openModal('Código de conexión',`<p class="modal-copy">En Windows, abre Configurar-Gateway.ps1 con el receptor conectado y copia el identificador que muestra. El código vence en 10 minutos y sirve para activar este gateway una vez.</p><p><a class="text-button" href="${gatewaySetupScript}" download="Configurar-Gateway.ps1">Descargar configurador para Windows</a></p><form><label>Identificador del receptor<input name="hardware" required pattern="ESP32-[A-F0-9]{12}" placeholder="ESP32-…" autocomplete="off"></label><button type="submit" class="primary">Generar código</button></form>`);
+  bindModal(async fields=>{
+   const configuration=await api('POST',{action:'gateway-prepare',id,hardware:String(fields.get('hardware'))});
+   const {ticket}=configuration;
+   openModal('Activa el gateway',`<p class="modal-copy">Copia el código al configurador de Windows. Después pega aquí la confirmación que te da el receptor.</p><label>Código privado<textarea id="gateway-setup-code" readonly rows="3" spellcheck="false"></textarea></label><button type="button" id="copy-gateway-code" class="secondary">Copiar código</button><form><label>Confirmación del receptor<input name="proof" required pattern="[a-f0-9]{64}" autocomplete="off"></label><button type="submit" class="primary">Activar gateway</button></form>`);
+   $('gateway-setup-code').value=JSON.stringify({...configuration,hardware:String(fields.get('hardware'))});
+   $('copy-gateway-code').onclick=async()=>{try{await navigator.clipboard.writeText($('gateway-setup-code').value);showToast('Código copiado.')}catch{$('gateway-setup-code').select()}};
+   bindModal(async confirmation=>{
+    await api('POST',{action:'gateway-finish',id,ticket,proof:String(confirmation.get('proof')).trim()});
+    $('modal').close();await reload();showToast('Gateway activado. Esperando conexión por Internet.');
+   });
+  });
+ }
  function render(){if(account!==user()?.id){void close();account=user()?.id;guideShown=false;}const el=$('guide-open');if(el)el.hidden=!!data().admin;const usbButton=$('connect-usb');if(usbButton)usbButton.hidden=!!data().admin&&!ownGateways().length;}
  function suggestGuide(){if(!data().admin&&!profile()?.guide_completed&&!demo()?.guideCompleted&&!guideShown&&!$('modal').open){guideShown=true;ctx.startGuide();return true}return false}
  $('guide-open').onclick=openGuide;$('connect-usb').onclick=openUSB;
- return {render,suggestGuide,close,openUSB,usbStatus};
+ return {render,suggestGuide,close,openUSB,usbStatus,openCode};
 }
