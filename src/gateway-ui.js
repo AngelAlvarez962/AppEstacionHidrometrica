@@ -1,6 +1,6 @@
 import {GatewaySerial,gatewayChange} from './gateway.js';
 import {displayId} from './onboarding.js';
-import gatewaySetupScript from '../firmware/Gateway_Internet/Configurar-Gateway.ps1?url&no-inline';
+import gatewaySetupScript from './assets/Configurar-Gateway.ps1?url&no-inline';
 export function installGatewayUI(ctx){
  const {$,escape,api,openModal,bindModal,reload,showToast}=ctx;
  let usb=null,selected=null,hello=null,recognized=false,remembered=false,lease=null,pending=null,busy=false,identificationTimer=null,lastPost=0,account=null,guideShown=false,step=0;
