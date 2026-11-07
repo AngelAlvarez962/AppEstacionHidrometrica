@@ -10,7 +10,11 @@ test('continuidad: registro horario, cambios, desconexión, recordatorio 24 h, r
  await db.query('update public.kit_stations set bed_height=100,capacity_height=40,yellow_alert=25,red_alert=35 where id=$1',[item.station_id]);await db.exec('reset role');
  await db.query('insert into public.kit_telegram(owner_id,chat_id,enabled) values($1,123,true)',[a]);
  const reading=async distance=>db.query("insert into public.kit_readings(station_id,distance_cm,sensor_status,packet,rssi) values($1,$2,'OK',1,-40)",[item.station_id,distance]);
- await reading(90);await as(a);const run=(await db.query('select public.kit_watch_start($1,1) r',[item.station_id])).rows[0].r;
+ await reading(90);
+ assert.equal((await db.query("select count(*)::int n from public.kit_telegram_outbox where severity='normal' and context_status='initial'")).rows[0].n,1);
+ await reading(89);
+ assert.equal((await db.query("select count(*)::int n from public.kit_telegram_outbox where severity='normal'")).rows[0].n,1);
+ await as(a);const run=(await db.query('select public.kit_watch_start($1,1) r',[item.station_id])).rows[0].r;
  assert.equal((await db.query('select kind from public.kit_watch_logs')).rows[0].kind,'inicio');
  await assert.rejects(db.query('select public.kit_watch_start($1,7)',[item.station_id]),/WATCH_ALREADY_ACTIVE/);
  await as(b);assert.equal((await db.query('select * from public.kit_watch_logs')).rows.length,0);await assert.rejects(db.query('select public.kit_watch_stop($1)',[run]),/DEVICE_NOT_ALLOWED/);
@@ -20,8 +24,8 @@ test('continuidad: registro horario, cambios, desconexión, recordatorio 24 h, r
  const count=async()=>(await db.query("select count(*)::int n from public.kit_telegram_outbox where severity='offline'")).rows[0].n;
  assert.equal(await count(),1);await db.query('select public.kit_watch_tick()');assert.equal(await count(),1);
  await db.exec("update public.kit_watch_state set notified_at=now()-interval '25 hours';update public.kit_telegram_outbox set created_at=now()-interval '25 hours'");await db.query('select public.kit_watch_tick()');assert.equal(await count(),2);
- await reading(90);assert.equal((await db.query("select count(*)::int n from public.kit_telegram_outbox where severity='normal'")).rows[0].n,1);
- await db.exec("update public.kit_watch_state set notified_at=now()-interval '25 hours'");await db.query('select public.kit_watch_tick()');assert.equal((await db.query("select count(*)::int n from public.kit_telegram_outbox where severity='normal'")).rows[0].n,1);
+ await reading(90);assert.equal((await db.query("select count(*)::int n from public.kit_telegram_outbox where severity='normal'")).rows[0].n,2);
+ await db.exec("update public.kit_watch_state set notified_at=now()-interval '25 hours'");await db.query('select public.kit_watch_tick()');assert.equal((await db.query("select count(*)::int n from public.kit_telegram_outbox where severity='normal'")).rows[0].n,2);
  await as(a);await db.query('select public.kit_watch_stop($1)',[run]);const logs=(await db.query('select * from public.kit_watch_logs')).rows.length;await db.exec('reset role');await db.query('select public.kit_watch_tick()');assert.equal((await db.query('select count(*)::int n from public.kit_watch_logs')).rows[0].n,logs);
  }finally{await db.close()}
 });

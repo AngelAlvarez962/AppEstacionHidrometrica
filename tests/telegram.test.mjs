@@ -20,7 +20,7 @@ test('vinculación privada de un uso, límites, pausa, cambios de nivel y lease'
  await db.query('select public.kit_telegram_preference(false,true)');await db.exec('reset role');assert.equal((await db.query('select enabled from public.kit_telegram where owner_id=$1',[a])).rows[0].enabled,true);
  const insert=distance=>db.query("insert into public.kit_readings(station_id,distance_cm,sensor_status,packet,rssi) values($1,$2,'OK',1,-70)",[item.station_id,distance]);
  await insert(70);await insert(69);await insert(60);await insert(90);await insert(70);
- assert.deepEqual((await db.query("select severity from public.kit_telegram_outbox where station_id is not null order by created_at,id")).rows.map(r=>r.severity).sort(),['normal','red','yellow']);
+ assert.deepEqual((await db.query("select severity from public.kit_telegram_outbox where station_id is not null order by created_at,id")).rows.map(r=>r.severity).sort(),['normal','red','yellow','yellow']);
  const event=(await db.query('select public.kit_telegram_take() r')).rows[0].r;assert(event.recipient==='123');
  assert.equal((await db.query('select public.kit_telegram_take() r')).rows[0].r,null);
  await db.query('select public.kit_telegram_finish($1,gen_random_uuid(),true)',[event.id]);assert.equal((await db.query('select sent_at from public.kit_telegram_outbox where id=$1',[event.id])).rows[0].sent_at,null);
